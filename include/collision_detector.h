@@ -27,6 +27,9 @@
 // Gflags
 #include <gflags/gflags.h>
 
+// Additional libraries
+#include "MultiFrame.h"
+
 using namespace std;
 
 namespace coldetector
@@ -34,6 +37,15 @@ namespace coldetector
     class CollisionDetector{
         private:
             vector<cv::Mat> girona1000_chassis_points_; 
+
+            /**
+             * Stores the current MultiFrame data received from the system
+            */
+            MultiFrame current_imgs_frame_;
+            /**
+             * Stores the frame current pose
+            */
+            cv::Matx<double, 4, 4> current_frame_pose_;
         
         public:
             // Constructor
@@ -50,11 +62,26 @@ namespace coldetector
              * @brief Function that initialize a set of 3D points for the AUV
              * chassis. These points are used later for assesing the risk.
             */
-           void assignChassisPoints();
-           /**
-            * @brief Obtains a pair of images and the estimated poses (vSLAm, INS data)
-            * and processed them to obtain the 3D points of the robot surroundings.
-           */
-          void Run();
+            void assignChassisPoints();
+            /**
+             * @brief Obtains a pair of images and the estimated poses (vSLAm, INS data)
+             * and processed them to obtain the 3D points of the robot surroundings.
+            */
+            void Run();
+            /**
+             * @brief Checks if new image and pose data is available from the system
+             * and copies them for processing
+            */
+            bool CheckDataAvailability();
+
+            // Data memebers
+            bool b_new_data_;
+            // Variables used for sharing and get data from the system
+            MultiFrame data_current_frame_imgs;
+            cv::Matx<double, 4, 4> data_current_pose;
+
+            // Mutex variables
+            std::mutex mReceiveData;
+
     };
 }

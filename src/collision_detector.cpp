@@ -9,15 +9,45 @@ using namespace cv::xfeatures2d;
 // PointCloud type definition
 typedef pcl::PointCloud<pcl::PointXYZRGB> PointCloud;
 
+// Parameters definition
+DECLARE_bool(clahe_processing);
+DECLARE_bool(matching_all_vs_all);
+DECLARE_bool(point_cloud_in_world);
+DECLARE_bool(consider_chassis);
+DECLARE_int32(int_epipolar_dst_thr);
+
 namespace coldetector
 {
-   CollisionDetector::CollisionDetector(){
+   CollisionDetector::CollisionDetector():
+   b_new_data_(false), b_do_clahe_(FLAGS_clahe_processing), b_matching_all_all_(FLAGS_matching_all_vs_all),
+   b_pointcloud_in_world_(FLAGS_point_cloud_in_world), b_consider_chassis_b_(FLAGS_consider_chassis)
+   {
       // Robot chasis, critical points initialization
-      assignChassisPoints();
+      if(b_consider_chassis_b_) assignChassisPoints();
    }
 
    void CollisionDetector::Run(){
+      // Final 3D pts variable
+      PointCloud::Ptr reconstructed_point_cloud(new PointCloud);
 
+      while (true) // Runs until program is closed
+      {
+         if(CheckDataAvailability()){ // Check if there is new data available from the robot
+         }
+      }
+      
+   }
+
+   bool CollisionDetector::CheckDataAvailability(){
+      std::unique_lock<std::mutex> lock(mReceiveData);
+      bool temp = b_new_data_;
+      if(b_new_data_){
+         current_imgs_frame_ = data_current_frame_imgs;
+         current_frame_pose_ = data_current_pose;
+         b_new_data_= false;
+      }
+
+      return temp;
    }
 
    void CollisionDetector::assignChassisPoints(){

@@ -1,0 +1,6 @@
+<launch>
+    <!--ros node-->
+    <node name="collision_detector" pkg="collision_detection_module" output="screen"
+    args="--flagfile=$(find collision_detection_module)/config/params.conf">
+    </node>
+</launch>
