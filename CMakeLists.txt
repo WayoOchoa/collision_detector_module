@@ -145,6 +145,8 @@ include_directories(
 
 SET(CollisionModuleHeaders
   include/collision_detector.h
+  include/MultiFrame.h
+  include/cSystem.h
 )
 
 SET(LIBS ${catkin_LIBRARIES} 
@@ -158,6 +160,8 @@ glog
  add_library(${PROJECT_NAME}
    src/collision_detector.cpp
    src/collision_detector_node.cpp
+   src/MultiFrame.cpp
+   src/cSystem.cpp
  )
 
 ## Add cmake target dependencies of the library

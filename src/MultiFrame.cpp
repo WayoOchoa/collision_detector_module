@@ -3,12 +3,11 @@
 
 using namespace std;
 
-class MultiFrame
+
+MultiFrame::MultiFrame(const std::vector<cv::Mat>& images, const double &timestamp):
+images_(images), timestamp_(timestamp)
 {
-    MultiFrame::MultiFrame(const std::vector<cv::Mat>& images, const double &timestamp):
-    images_(images), timestamp_(timestamp)
-    {
-        //TODO: SET CAMERA SYSTEM K AND [R|T] + NUM CAMS
-    }
-};
+    //TODO: SET CAMERA SYSTEM K AND [R|T] + NUM CAMS
+}
+
 

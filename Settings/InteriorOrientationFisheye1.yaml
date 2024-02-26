@@ -1,0 +1,41 @@
+%YAML:1.0
+
+# Camera calibration parameters camera_0
+Camera.Iw: 808
+Camera.Ih: 616
+
+# hyperparameters
+Camera.nrpol: 1
+Camera.nrinvpol: 7
+
+# forward polynomial f(\rho)
+Camera.a0: -547.696
+
+# backward polynomial rho(\theta)
+Camera.pol0: 3.353764498960259e+03
+Camera.pol1: 8.909792581315050e+03
+Camera.pol2: 1.250929069651531e+04
+Camera.pol3: 1.067719392740768e+04
+Camera.pol4: 5.406774415047752e+03
+Camera.pol5: 1.509264426833152e+03
+Camera.pol6: 1.780911437986699e+02
+
+# affine matrix
+Camera.c: 1.0
+Camera.d: 1.0e-08
+Camera.e: 1.0e-08
+
+# principal point
+Camera.u0: 403.5
+Camera.v0: 307.5
+
+# create a mirror mask for fisheye cameras
+Camera.mirrorMask: 0
+
+# Pinhole model
+Camera.pinhole_fx: 547.696
+Camera.pinhole_fy: 547.696
+Camera.pinhole_px: 403.5
+Camera.pinhole_py: 307.5
+    
+

@@ -70,7 +70,8 @@ namespace coldetector
             void Run();
             /**
              * @brief Checks if new image and pose data is available from the system
-             * and copies them for processing
+             * and copies them for processing.
+             * @return temp Flag that indicates wether if new data has been receieved or not.
             */
             bool CheckDataAvailability();
 

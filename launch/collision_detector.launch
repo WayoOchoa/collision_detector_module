@@ -1,6 +1,9 @@
 <launch>
+    <!--Configurable arguments-->
+    <arg name="cameras_calibrations_path" default="$(find collision_detection_module)/Settings"/>
+
     <!--ros node-->
     <node name="collision_detector" pkg="collision_detection_module" output="screen"
-    args="--flagfile=$(find collision_detection_module)/config/params.conf">
+    args="$(arg cameras_calibrations_path) --flagfile=$(find collision_detection_module)/config/params.conf">
     </node>
 </launch>
