@@ -1,5 +1,4 @@
 %YAML:1.0
-
 # Multi-camera calibration matrices (M_c)
 # rotation elements are in cayley parametrization
 CameraSystem.nrCams: 6

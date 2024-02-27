@@ -5,6 +5,7 @@
 
 // OpenCv library
 #include <opencv2/core/core.hpp>
+#include <opencv2/opencv.hpp>
 
 class cSystem{
     private:
@@ -18,6 +19,7 @@ class cSystem{
         /**
          * Create a new cSystem object.
          * @brief Default constructor.
+         * @see cSystem(const std::string& path2calib)
          * @see
         */
         cSystem(): nrCams_(0){};
@@ -27,8 +29,8 @@ class cSystem{
         ~cSystem(){};
         /**
          * Construct a new cSystem object from a configuration file.
-         * @brief Constructor
-         * @param 
+         * @brief Constructor.
+         * @param path2calib Path to configuration files.
         */
         cSystem(const std::string& path2calib);
 
@@ -39,6 +41,13 @@ class cSystem{
          * the system.
         */
         void LoadMCS(const std::string path2calib);
+        /**
+         * @brief Set the camera system configuration.
+         * @param numCams Number of cameras that compose the system.
+         * @param cayley_calibration_params Vector of matrices containing the 6 cayley parameters for each camera.
+         * @param intrinsic_params Vector of matrices containing the instrinsic parameters for each camera.
+        */
+        void setSystemConfig(int numCams, std::vector<cv::Matx61d> cayley_calibration_params, std::vector<cv::Matx41d> intrinsic_params);
 
         /**
          * 6x1 minimal homogeneous transformation vector to homogeneous 4x4 transformation mattrix

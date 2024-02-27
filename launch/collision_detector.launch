@@ -1,9 +1,9 @@
 <launch>
     <!--Configurable arguments-->
     <arg name="cameras_calibrations_path" default="$(find collision_detection_module)/Settings"/>
+    <rosparam command="load" file="$(find collision_detection_module)/Settings/calibration_params.yaml"/>
 
     <!--ros node-->
-    <node name="collision_detector" pkg="collision_detection_module" output="screen"
-    args="$(arg cameras_calibrations_path) --flagfile=$(find collision_detection_module)/config/params.conf">
-    </node>
+    <node name="collision_detector" pkg="collision_detection_module" type ="collision_detection_module_node" output="screen"
+    args="--flagfile=$(find collision_detection_module)/config/params.conf $(arg cameras_calibrations_path)"/>
 </launch>

@@ -18,8 +18,8 @@ find_package(catkin REQUIRED COMPONENTS
 ## System dependencies are found with CMake's conventions
 
 ## Local OpenCV dependency
-set(OpenCV_DIR /usr/local/lib/cmake/opencv4)
-find_package(OpenCV REQUIRED)
+#set(OpenCV_DIR /usr/local/lib/cmake/opencv4)
+find_package(OpenCV 4.5 REQUIRED)
 #message(${OpenCV_INCLUDE_DIRS})
 #message(${OpenCV_LIBRARIES})
 
@@ -35,6 +35,8 @@ find_package(Boost REQUIRED)
 find_package(glog REQUIRED)
 find_package(gflags REQUIRED)
 
+## YAML-CPP
+#find_package(yaml-cpp REQUIRED)
 
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
@@ -141,6 +143,7 @@ include_directories(
   ${PCL_INCLUDE_DIRS}
   ${gflags_INCLUDE_DIR}
   ${glog_INCLUDE_DIR}
+  #${YAML_CPP_INCLUDE_DIR}
 )
 
 SET(CollisionModuleHeaders
@@ -152,6 +155,7 @@ SET(CollisionModuleHeaders
 SET(LIBS ${catkin_LIBRARIES} 
 ${OpenCV_LIBRARIES} 
 ${PCL_LIBRARIES}
+#yaml-cpp
 gflags
 glog
 )
@@ -159,7 +163,6 @@ glog
 ## Declare a C++ library
  add_library(${PROJECT_NAME}
    src/collision_detector.cpp
-   src/collision_detector_node.cpp
    src/MultiFrame.cpp
    src/cSystem.cpp
  )
