@@ -1,6 +1,7 @@
 #include <iostream>
 #include <gflags/gflags.h>
 #include <glog/logging.h>
+#include <thread>
 
 // System Libraries
 #include <collision_detector.h>
@@ -42,6 +43,9 @@ class CollisionNode{
         std::vector<cv::Matx61d> M_c_; // Extrinsics Cayley parameters
         std::vector<cv::Matx41d> K_c_; // Intrinsics
 
+        // Collision detection thread
+        std::thread* CollisionDetection;
+
     public:
         // Constructor
         CollisionNode(ros::NodeHandle &nh, const string &path2calibrations): 
@@ -60,6 +64,10 @@ class CollisionNode{
             int nrCams;
             nh_.getParam("/CameraSystem_nrCams",nrCams);
             cam_system_.setSystemConfig(nrCams,M_c_,K_c_);
+
+            // Starting collision detection thread
+            coldetector::CollisionDetector* coldetector = new coldetector::CollisionDetector(&cam_system_);
+            CollisionDetection = new thread(&coldetector::CollisionDetector::Run, coldetector);
         };
         ~CollisionNode(){};
 
@@ -118,6 +126,7 @@ int main(int argc, char** argv){
 
     CollisionNode my_collision_node(nh);
 
+    ros::spin();
 
     return 0;
 }

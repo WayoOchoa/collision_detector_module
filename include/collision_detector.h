@@ -29,6 +29,7 @@
 
 // Additional libraries
 #include "MultiFrame.h"
+#include "cSystem.h"
 
 using namespace std;
 
@@ -46,10 +47,12 @@ namespace coldetector
              * Stores the frame current pose
             */
             cv::Matx<double, 4, 4> current_frame_pose_;
+            // Camera system configuration parameters
+            cSystem* cam_system_;
         
         public:
             // Constructor
-            CollisionDetector();
+            CollisionDetector(cSystem *cam_system);
             ~CollisionDetector(){};
 
             //Parameters

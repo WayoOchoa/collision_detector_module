@@ -18,9 +18,9 @@ DECLARE_int32(int_epipolar_dst_thr);
 
 namespace coldetector
 {
-   CollisionDetector::CollisionDetector():
+   CollisionDetector::CollisionDetector(cSystem *cam_system):
    b_new_data_(false), b_do_clahe_(FLAGS_clahe_processing), b_matching_all_all_(FLAGS_matching_all_vs_all),
-   b_pointcloud_in_world_(FLAGS_point_cloud_in_world), b_consider_chassis_b_(FLAGS_consider_chassis)
+   b_pointcloud_in_world_(FLAGS_point_cloud_in_world), b_consider_chassis_b_(FLAGS_consider_chassis), cam_system_(cam_system)
    {
       // Robot chasis, critical points initialization
       if(b_consider_chassis_b_) assignChassisPoints();
