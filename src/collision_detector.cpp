@@ -50,6 +50,13 @@ namespace coldetector
       return temp;
    }
 
+   void CollisionDetector::transferData(MultiFrame &F, bool new_data){
+      std::unique_lock<std::mutex> lock(mReceiveData);
+      b_new_data_ = new_data;
+      data_current_frame_imgs = F; // TODO: Check if a copy assignment operator is needed. Compare both variable addresses
+      //TODO: Add the pose coming from the INS
+   }
+
    void CollisionDetector::assignChassisPoints(){
       // All points assigned to the chassis are w.r.t. the camera system axes. These
       // are defined with the actual values of the AUV.

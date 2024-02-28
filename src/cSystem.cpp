@@ -59,3 +59,11 @@ void cSystem::setSystemConfig(int numCams,std::vector<cv::Matx61d> cayley_calibr
     // Copying variables
     M_c_ = M_c; K_c_ = K_c;
 }
+
+cv::Mat cSystem::getK_c(int cam){
+    return K_c_[cam];
+}
+
+cv::Matx44d cSystem::getM_c(int cam){
+    return M_c_[cam];
+}

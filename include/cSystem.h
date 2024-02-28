@@ -48,6 +48,18 @@ class cSystem{
          * @param intrinsic_params Vector of matrices containing the instrinsic parameters for each camera.
         */
         void setSystemConfig(int numCams, std::vector<cv::Matx61d> cayley_calibration_params, std::vector<cv::Matx41d> intrinsic_params);
+        /**
+         * Gets the instrinsic calibration matrix from the camera c
+         * @param cam The camera number identifier. 
+         * @return K_c A 3x3 Intrinsic calibration matrix.
+        */
+        cv::Mat getK_c(int cam);
+        /**
+         * Gets the extrinsic calibration matrix from the camera c.
+         * @param cam The camera number identifier. 
+         * @return M_c A 4x4 Extrinsics calibration matrix.
+        */
+        cv::Matx44d getM_c(int cam);
 
         /**
          * 6x1 minimal homogeneous transformation vector to homogeneous 4x4 transformation mattrix

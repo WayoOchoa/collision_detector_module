@@ -40,13 +40,21 @@ namespace coldetector
             vector<cv::Mat> girona1000_chassis_points_; 
 
             /**
-             * Stores the current MultiFrame data received from the system
+             * Stores the current MultiFrame data received from the system at time t
             */
             MultiFrame current_imgs_frame_;
+            /**
+             * Stores the previous MultiFrame data received from the system at (t-1)
+            */
+            MultiFrame previous_imgs_frame_;
             /**
              * Stores the frame current pose
             */
             cv::Matx<double, 4, 4> current_frame_pose_;
+            /**
+             * Stores the previous frame pose
+            */
+            cv::Matx<double, 4, 4> previous_frame_pose_;
             // Camera system configuration parameters
             cSystem* cam_system_;
         
@@ -77,6 +85,13 @@ namespace coldetector
              * @return temp Flag that indicates wether if new data has been receieved or not.
             */
             bool CheckDataAvailability();
+            /**
+             * @brief Transfers data from the main program to the collision detection thread.
+             * @param F MultiFrame object that contains an array of N images, corresponding to each
+             * camera.
+             * @param new_data Flag that indicates that new data has been received.
+            */
+            void transferData(MultiFrame &F, bool new_data);
 
             // Data memebers
             bool b_new_data_;
