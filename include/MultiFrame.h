@@ -33,4 +33,6 @@ class MultiFrame{
         std::vector<cv::Mat> images_;
         // Frame timestamp
         double timestamp_;
+        // Flag to check if the frame is empty
+        bool b_empty;
 };

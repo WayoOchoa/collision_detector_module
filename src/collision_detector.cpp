@@ -32,7 +32,23 @@ namespace coldetector
 
       while (true) // Runs until program is closed
       {
+         bool b_new_pc_data = false; // Variable to control if a PointCloud was successfully computed
          if(CheckDataAvailability()){ // Check if there is new data available from the robot
+            current_imgs_frame_ = new_frame_data_; // Set the current frame to the newly received data.
+            reconstructed_point_cloud.reset(new PointCloud);
+
+            // Checking that we have already received two frames from the system
+            if(!previous_imgs_frame_.b_empty){
+               std::vector<cv::Mat> final_3d_points; // Stores the triangulated points
+
+               // TODO: Get Camera Base Poses
+
+               /// Process camera data
+               for(int cam_id = 0; cam_id < cam_system_->get_nrCams(); cam_id++){
+                  // TODO
+                  continue;
+               }
+            }
          }
       }
       
@@ -42,8 +58,8 @@ namespace coldetector
       std::unique_lock<std::mutex> lock(mReceiveData);
       bool temp = b_new_data_;
       if(b_new_data_){
-         current_imgs_frame_ = data_current_frame_imgs;
-         current_frame_pose_ = data_current_pose;
+         new_frame_data_ = data_current_frame_imgs;
+         new_frame_pose_ = data_current_pose;
          b_new_data_= false;
       }
 

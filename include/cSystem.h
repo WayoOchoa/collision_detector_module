@@ -60,6 +60,11 @@ class cSystem{
          * @return M_c A 4x4 Extrinsics calibration matrix.
         */
         cv::Matx44d getM_c(int cam);
+        /**
+         * Gets the number of cameras in the system
+         * @return nCams Number of cameras.
+        */
+        int get_nrCams();
 
         /**
          * 6x1 minimal homogeneous transformation vector to homogeneous 4x4 transformation mattrix

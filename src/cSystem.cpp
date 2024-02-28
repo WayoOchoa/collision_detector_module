@@ -67,3 +67,7 @@ cv::Mat cSystem::getK_c(int cam){
 cv::Matx44d cSystem::getM_c(int cam){
     return M_c_[cam];
 }
+
+int cSystem::get_nrCams(){
+    return nrCams_;
+}

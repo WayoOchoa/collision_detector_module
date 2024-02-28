@@ -40,6 +40,11 @@ namespace coldetector
             vector<cv::Mat> girona1000_chassis_points_; 
 
             /**
+             * Variable that stores the new acquired/tracked frame
+            */
+            MultiFrame new_frame_data_;
+            cv::Matx<double, 4, 4> new_frame_pose_;
+            /**
              * Stores the current MultiFrame data received from the system at time t
             */
             MultiFrame current_imgs_frame_;
