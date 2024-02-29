@@ -5,5 +5,15 @@
 
     <!--ros node-->
     <node name="collision_detector" pkg="collision_detection_module" type ="collision_detection_module_node" output="screen"
-    args="--flagfile=$(find collision_detection_module)/config/params.conf $(arg cameras_calibrations_path)"/>
+    args="--flagfile=$(find collision_detection_module)/config/params.conf $(arg cameras_calibrations_path)">
+        <!--Remap of topics-->
+        <remap from="/ladybug1/image_color" to="/girona500/ladybug1/image_color"/>
+        <remap from="/ladybug2/image_color" to="/girona500/ladybug2/image_color"/>
+        <remap from="/ladybug3/image_color" to="/girona500/ladybug3/image_color"/>
+        <remap from="/ladybug4/image_color" to="/girona500/ladybug4/image_color"/>
+        <remap from="/ladybug5/image_color" to="/girona500/ladybug5/image_color"/>
+        <remap from="/ladybug6/image_color" to="/girona500/ladybug6/image_color"/>
+        <remap from="/dynamics/odometry" to="/girona500/dynamics/odometry"/>
+        <remap from="/navigator/navigation" to="/girona500/navigator/navigation"/>
+    </node>
 </launch>

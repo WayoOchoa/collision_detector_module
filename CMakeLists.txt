@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 3.0.2)
+set (CMAKE_CXX_STANDARD 11)
 project(collision_detection_module)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
@@ -8,18 +9,21 @@ project(collision_detection_module)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-  cv_bridge
+  cv_bridge # https://robotics.stackexchange.com/questions/100686/solvedhow-specify-opencv-version-in-cv-bridge
   image_transport
   roscpp
   rospy
   std_msgs
+  cola2_lib_ros
+  cola2_msgs
+  nav_msgs
   message_generation
 )
 
 ## System dependencies are found with CMake's conventions
 
 ## Local OpenCV dependency
-#set(OpenCV_DIR /usr/local/lib/cmake/opencv4)
+set(OpenCV_DIR /usr/local/lib/cmake/opencv4)
 find_package(OpenCV 4.5 REQUIRED)
 #message(${OpenCV_INCLUDE_DIRS})
 #message(${OpenCV_LIBRARIES})
@@ -129,9 +133,8 @@ find_package(Boost REQUIRED COMPONENTS thread system)
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
 #  INCLUDE_DIRS include
-#  LIBRARIES collision_detection_module
-  CATKIN_DEPENDS cv_bridge image_transport roscpp rospy std_msgs
-#  DEPENDS system_lib
+  LIBRARIES ${PROJECT_NAME}
+  CATKIN_DEPENDS cv_bridge image_transport roscpp rospy std_msgs nav_msgs cola2_lib_ros cola2_msgs
 )
 
 ###########

@@ -11,6 +11,7 @@
 
 //OpenCV includes
 #include <opencv2/core.hpp>
+#include <opencv2/opencv.hpp>
 #include <opencv2/sfm.hpp>
 #include <opencv2/highgui.hpp>
 #include <opencv2/features2d.hpp>
@@ -43,7 +44,6 @@ namespace coldetector
              * Variable that stores the new acquired/tracked frame
             */
             MultiFrame new_frame_data_;
-            cv::Matx<double, 4, 4> new_frame_pose_;
             /**
              * Stores the current MultiFrame data received from the system at time t
             */
@@ -52,16 +52,18 @@ namespace coldetector
              * Stores the previous MultiFrame data received from the system at (t-1)
             */
             MultiFrame previous_imgs_frame_;
-            /**
-             * Stores the frame current pose
-            */
-            cv::Matx<double, 4, 4> current_frame_pose_;
-            /**
-             * Stores the previous frame pose
-            */
-            cv::Matx<double, 4, 4> previous_frame_pose_;
             // Camera system configuration parameters
             cSystem* cam_system_;
+
+            /**
+             * Flag that indicates if a stop has been requested
+            */
+            bool bFinishRequested_;
+
+            /**
+             * Checks if a request to stop the program has been made
+            */
+            bool CheckifStop();
         
         public:
             // Constructor
@@ -97,6 +99,21 @@ namespace coldetector
              * @param new_data Flag that indicates that new data has been received.
             */
             void transferData(MultiFrame &F, bool new_data);
+            /**
+             * @brief Updates the previous_frame data with the current_frame that was already processed.
+            */
+            void FramesUpdate(MultiFrame &current_frame);
+            /**
+             * @brief Computes the relative transformation between two frames.
+             * 
+            */
+            void GetRelativeTransformationBetweenFrames(cv::Mat &base_T_cam, cv::Mat &world_Tprevious_base,
+                                                        cv::Mat &world_Tcurrent_base, cv::Mat &cam_previous_T_cam_current);
+            /**
+             * @brief Compute keypoints and its descriptors in two images.
+            */
+            void ComputeFeatures(std::vector <cv::KeyPoint> &keypoints_previous_i, std::vector <cv::KeyPoint> &keypoints_current_i,
+                                cv::Mat &descriptors_previous_i, cv::Mat &descriptors_current_i);
 
             // Data memebers
             bool b_new_data_;
@@ -104,8 +121,14 @@ namespace coldetector
             MultiFrame data_current_frame_imgs;
             cv::Matx<double, 4, 4> data_current_pose;
 
+            /**
+             * Stops the thread when requested from the main program
+            */
+            void StopRequest();
+
             // Mutex variables
             std::mutex mReceiveData;
+            std::mutex mMutexStop;
 
     };
 }

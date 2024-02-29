@@ -1,6 +1,10 @@
 # Multi-camera calibration matrices (M_c)
 # rotation elements are in cayley parametrization
 CameraSystem_nrCams: 6
+# Real pose of the camera in the robot structure
+cam_origin_pose_x: 0.05
+cam_origin_pose_y: 0.0
+cam_origin_pose_z: 1.0
 # camera_0
 CameraSystem_cam1_1: -0.000486145179002   #r1
 CameraSystem_cam1_2: 0.9969892501         #r2
