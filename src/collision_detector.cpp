@@ -41,7 +41,7 @@ namespace coldetector
       PointCloud::Ptr reconstructed_point_cloud(new PointCloud);
       int number_cams = cam_system_->get_nrCams();
 
-      while (true) // Runs until program is closed
+      while(true) // Runs until program is closed
       {
          bool b_new_pc_data = false; // Variable to control if a PointCloud was successfully computed
          if(CheckDataAvailability()){ // Check if there is new data available from the robot
@@ -72,9 +72,7 @@ namespace coldetector
                   cv::Mat previous_image_cam_i, current_image_cam_i;
                   if(FLAGS_clahe_processing){
                      cv::Ptr<cv::CLAHE> clahe = cv::createCLAHE();
-                     cout <<"C1\n";
                      clahe->setClipLimit(2.0);
-                     cout <<"C2\n";
                      clahe->apply(previous_imgs_frame_.images_[cam_id], previous_image_cam_i);
                      clahe->apply(current_imgs_frame_.images_[cam_id], current_image_cam_i);
                   }else{
@@ -82,13 +80,34 @@ namespace coldetector
                      current_image_cam_i = current_imgs_frame_.images_[cam_id];
                   }
 
-                  // 3. Feature detection
+                  // 3. Feature detection and matching
                   // Detect keypoints in both images and compute its descriptors
                   std::vector<cv::KeyPoint> keypoints_previous_i, keypoints_current_i;
                   cv::Mat descriptors_previous_i, descriptors_current_i;
-                  ComputeFeatures(keypoints_previous_i,keypoints_current_i,descriptors_previous_i,descriptors_current_i);
+                  ComputeFeatures(previous_image_cam_i, current_image_cam_i, keypoints_previous_i,keypoints_current_i,descriptors_previous_i,
+                                 descriptors_current_i);
+                  // Match keypoints between the two frames
+                  std::vector<cv::DMatch> best_matches;
+                  std::vector<cv::DMatch> filtered_matches;
+                  // Compute the fundamental matrix between the frames
+                  cv::Mat current_Fprevious(3,3,CV_64F);
+                  ComputeFundamentalMatrix(cam_current_Tcam_previous, cam_system_->getK_c(cam_id), 
+                                       current_Fprevious); // where cam_system_->getK_c(cam_id) is the intrinsic matrix of cam_id
 
-                  continue;
+                  if(FLAGS_matching_all_vs_all){
+                     ComputeMatchesAllvsAll(descriptors_previous_i,descriptors_current_i,best_matches);
+                     FilterMatchesByEpipolarConstrain(keypoints_previous_i,keypoints_current_i,best_matches,current_Fprevious,filtered_matches);
+                  }else{
+                     
+                  }
+                  
+                  // 4. Triangulation step
+
+
+                  // find the projective matrices of both frames
+                  cv::Mat P_previous, P_current;
+
+
                }
             }
             FramesUpdate(current_imgs_frame_);  
@@ -129,13 +148,71 @@ namespace coldetector
       cam_previous_T_cam_current = world_Tprevious_cam.inv() * world_Tcurrent_cam;
    }
 
-   void CollisionDetector::ComputeFeatures(std::vector <cv::KeyPoint> &keypoints_previous_i, std::vector <cv::KeyPoint> &keypoints_current_i,
-                                          cv::Mat &descriptors_previous_i, cv::Mat &descriptors_current_i){
+   void CollisionDetector::ComputeFeatures(cv::Mat &previous_image_cam_i, cv::Mat &current_image_cam_i, std::vector <cv::KeyPoint> &keypoints_previous_i, 
+                           std::vector <cv::KeyPoint> &keypoints_current_i, cv::Mat &descriptors_previous_i, cv::Mat &descriptors_current_i){
+      // Obtains the keypoints and descriptors of the previous_image_frame and current_image_frame
       if(FLAGS_detector_type == "SIFT"){
-         //cv::Ptr<SIFT> detector = SIFT::create(FLAGS_number_of_features,FLAGS_nOctaveLayers,FLAGS_contrastThreshold,
-         //                                             FLAGS_edgeThreshold, FLAGS_sigma);
+         cv::Ptr<SIFT> detector = SIFT::create(FLAGS_number_of_features,FLAGS_nOctaveLayers,FLAGS_contrastThreshold,
+                                                      FLAGS_edgeThreshold, FLAGS_sigma);
+         detector->detectAndCompute(previous_image_cam_i,cv::Mat(), keypoints_previous_i, descriptors_previous_i);
+         detector->detectAndCompute(current_image_cam_i,cv::Mat(), keypoints_current_i, descriptors_current_i);
+
       }else if(FLAGS_detector_type == "SURF"){
-         //cv::Ptr<SURF> detector = SURF::create(FLAGS_min_Hessian,FLAGS_nOctaves,FLAGS_nOctaveLayers,false);
+         cv::Ptr<SURF> detector = SURF::create(FLAGS_min_Hessian,FLAGS_nOctaves,FLAGS_nOctaveLayers,false);
+         detector->detectAndCompute(previous_image_cam_i,cv::Mat(), keypoints_previous_i, descriptors_previous_i);
+         detector->detectAndCompute(current_image_cam_i,cv::Mat(), keypoints_current_i, descriptors_current_i);
+      }
+   }
+
+   // Computes the fundamental matrix between two frames given the transformation matrix
+   void CollisionDetector::ComputeFundamentalMatrix(cv::Mat & current_T_previous, cv::Mat cam_K, cv::Mat &current_F_previous){
+       // https://sourishghosh.com/2016/fundamental-matrix-from-camera-matrices/
+       cv::Mat rotation = current_T_previous(cv::Range(0, 3), cv::Range(0, 3) );
+       cv::Mat translation = (cv::Mat_<double>(3,1) << current_T_previous.at<double>(0,3),
+               current_T_previous.at<double>(1,3),
+               current_T_previous.at<double>(2,3));
+       cv::Mat A = cam_K * rotation.t() * translation;
+       cv::Mat cross_product_mat = (cv::Mat_<double>(3,3) << 0, -A.at<double>(2,0), A.at<double>(1,0),
+               A.at<double>(2,0), 0, -A.at<double>(0,0),
+               -A.at<double>(1,0), A.at<double>(0,0), 0);
+       current_F_previous = (cam_K.inv()).t() * rotation * cam_K.t() * cross_product_mat;
+       current_F_previous = current_F_previous/current_F_previous.at<double>(2,2);
+   }
+
+   void CollisionDetector::ComputeMatchesAllvsAll(cv::Mat &descriptors_previous_i, cv::Mat &descriptors_current_i, std::vector<cv::DMatch>& best_matches){
+      // Performs the matching algorithm of all descriptors of one image against all descriptors of a second one
+      if(FLAGS_detector_type == "SIFT" || FLAGS_detector_type == "SURF"){
+         // Matching the desriptors using FLANN matcher
+         std::vector<std::vector<cv::DMatch>> knn_matches;
+         cv::Ptr<cv::DescriptorMatcher> matcher = DescriptorMatcher::create(cv::DescriptorMatcher::FLANNBASED);
+         matcher->knnMatch(descriptors_previous_i, descriptors_current_i, knn_matches,2);
+
+         // Filtering of matches by Lowe's ratio test
+         const float ratio_threshold = 0.8f;
+         for(size_t i=0; i < knn_matches.size(); i++){
+            if(knn_matches[i][0].distance < ratio_threshold * knn_matches[i][1].distance){
+               best_matches.push_back(knn_matches[i][0]);
+            }
+         }
+      }
+   }
+
+   void CollisionDetector::FilterMatchesByEpipolarConstrain(std::vector <cv::KeyPoint> &keypoints_previous_i, std::vector <cv::KeyPoint> &keypoints_current_i, 
+                           std::vector<cv::DMatch> &best_matches, cv::Mat &F_matrix, std::vector<cv::DMatch>& filtered_matches){
+      // Compute epipolar lines on the current image frame
+      std::vector<cv::Point2f> points_previous_i, points_current_i;
+      FromMatchesToVectorofPoints(keypoints_previous_i, keypoints_current_i, best_matches, // Transforms the matches into the correspondent input that
+                                 points_previous_i,points_current_i);                      // the function cv::computeCorrespondEpilines requires
+      std::vector<cv::Vec3f> lines_current_i;
+      cv::computeCorrespondEpilines(points_previous_i, 1, F_matrix,lines_current_i);
+   }
+
+   // Transform a vector of DMatch into a one of Point2d
+   void CollisionDetector::FromMatchesToVectorofPoints(std::vector<cv::KeyPoint> &keypoints_frame1, std::vector<cv::KeyPoint> &keypoints_frame2,
+                                    std::vector<cv::DMatch> &matches, std::vector <cv::Point2f> &points_frame1,std::vector <cv::Point2f> &points_frame2){
+      for (int p = 0; p < (int)matches.size(); p++) {
+              points_frame1.push_back(keypoints_frame1[matches[p].queryIdx].pt);
+              points_frame2.push_back(keypoints_frame2[matches[p].trainIdx].pt);
       }
    }
 

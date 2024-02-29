@@ -1,5 +1,4 @@
 cmake_minimum_required(VERSION 3.0.2)
-set (CMAKE_CXX_STANDARD 11)
 project(collision_detection_module)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
@@ -25,6 +24,13 @@ find_package(catkin REQUIRED COMPONENTS
 ## Local OpenCV dependency
 set(OpenCV_DIR /usr/local/lib/cmake/opencv4)
 find_package(OpenCV 4.5 REQUIRED)
+set(OPENCV_ENABLE_NONFREE "Enable non-free algorithms" ON)
+
+if(OPENCV_ENABLE_NONFREE)
+    message("  Non-free algorithms are enabled")
+else()
+    message("  Non-free algorithms are NOT enabled")
+endif()
 #message(${OpenCV_INCLUDE_DIRS})
 #message(${OpenCV_LIBRARIES})
 
@@ -184,7 +190,7 @@ glog
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
 add_executable(${PROJECT_NAME}_node ${SOURCE_FILES} src/collision_detector_node.cpp)
-target_link_libraries(${PROJECT_NAME}_node ${LIBS} ${PROJECT_NAME})
+target_link_libraries(${PROJECT_NAME}_node ${PROJECT_NAME} ${LIBS})
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
