@@ -13,8 +13,10 @@
 #include "image_transport/image_transport.h"
 #include <cv_bridge/cv_bridge.h>
 #include "collision_detection_module/TransferData.h"
+#include "collision_detection_module/DescribedPointCloud.h"
 #include "nav_msgs/Odometry.h"
 #include "cola2_msgs/NavSts.h"
+#include <pcl_ros/point_cloud.h>
 
 // OpenCV libraries
 #include <opencv2/core/core.hpp>
@@ -125,7 +127,7 @@ class CollisionNode{
             cam_system_.setSystemConfig(nrCams,M_c_,K_c_);
 
             // Publishers initialization
-            pc_pub_ = nh_.advertise<PointCloud>("local_point_cloud",2);
+            pc_pub_ = nh_.advertise<collision_detection_module::DescribedPointCloud>("local_point_cloud",2);
 
             // Starting collision detection thread
             coldetector = new coldetector::CollisionDetector(&cam_system_,&pc_pub_);

@@ -3,6 +3,7 @@
 #include "collision_detector.h"
 
 #include "ros/ros.h"
+#include "collision_detection_module/DescribedPointCloud.h"
 
 using namespace cv;
 using namespace cv::xfeatures2d;
@@ -118,8 +119,8 @@ namespace coldetector
                }
 
                // Convert Mat of Points into PointCloud variable
-               cout << "f3d: " << final_3d_points.size() <<endl;
                if(final_3d_points.size() < 200) continue; // Not enough points were triangulated
+               collision_detection_module::DescribedPointCloud msg;
                for(int p = 0; p < final_3d_points.size(); p++){
                   pcl::PointXYZ point3d;
                   point3d.x = final_3d_points[p].at<double>(0,0);
@@ -132,10 +133,7 @@ namespace coldetector
                reconstructed_point_cloud->height = 1;
 
                // Publishing data
-               cout << "A\n";
-               cout << "rpc: " << reconstructed_point_cloud->points.size() << endl;
-               pc_pub_->publish(reconstructed_point_cloud);
-               cout << "B\n";
+               //pc_pub_->publish(reconstructed_point_cloud);
             }
             FramesUpdate(current_imgs_frame_);  
          }

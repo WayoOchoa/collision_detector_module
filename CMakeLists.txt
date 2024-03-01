@@ -16,6 +16,7 @@ find_package(catkin REQUIRED COMPONENTS
   cola2_lib_ros
   cola2_msgs
   nav_msgs
+  sensor_msgs
   message_generation
 )
 
@@ -82,11 +83,11 @@ find_package(Boost REQUIRED COMPONENTS thread system)
 ##   * add every package in MSG_DEP_SET to generate_messages(DEPENDENCIES ...)
 
 ## Generate messages in the 'msg' folder
-# add_message_files(
-#   FILES
-#   Message1.msg
+ add_message_files(
+   FILES
+   DescribedPointCloud.msg
 #   Message2.msg
-# )
+ )
 
 ## Generate services in the 'srv' folder
  add_service_files(
@@ -104,8 +105,8 @@ find_package(Boost REQUIRED COMPONENTS thread system)
 
 ## Generate added messages and services with any dependencies listed here
  generate_messages(
-#   DEPENDENCIES
-#   std_msgs
+   DEPENDENCIES
+   std_msgs sensor_msgs
  )
 
 ################################################
@@ -140,7 +141,7 @@ find_package(Boost REQUIRED COMPONENTS thread system)
 catkin_package(
 #  INCLUDE_DIRS include
   LIBRARIES ${PROJECT_NAME}
-  CATKIN_DEPENDS cv_bridge image_transport roscpp rospy std_msgs nav_msgs cola2_lib_ros cola2_msgs
+  CATKIN_DEPENDS cv_bridge image_transport roscpp rospy std_msgs nav_msgs cola2_lib_ros cola2_msgs sensor_msgs message_runtime
 )
 
 ###########

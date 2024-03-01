@@ -1,0 +1,4 @@
+sensor_msgs/PointCloud2 points3d
+std_msgs/Float32[] descriptors
+int32 descriptor_length
+int32 num_descriptors
