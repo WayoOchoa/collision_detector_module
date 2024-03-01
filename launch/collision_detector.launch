@@ -13,7 +13,7 @@
         <remap from="/ladybug4/image_color" to="/girona500/ladybug4/image_color"/>
         <remap from="/ladybug5/image_color" to="/girona500/ladybug5/image_color"/>
         <remap from="/ladybug6/image_color" to="/girona500/ladybug6/image_color"/>
-        <remap from="/dynamics/odometry" to="/girona500/dynamics/odometry"/>
+        <remap from="/navigator/odometry" to="/girona500/navigator/odometry"/>
         <remap from="/navigator/navigation" to="/girona500/navigator/navigation"/>
     </node>
 </launch>

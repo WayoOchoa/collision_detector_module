@@ -54,8 +54,8 @@ namespace coldetector
             MultiFrame previous_imgs_frame_;
             // Camera system configuration parameters
             cSystem* cam_system_;
-            // Main thread object pointer
-            
+            // Main thread publishers
+            ros::Publisher *pc_pub_;
 
             /**
              * Flag that indicates if a stop has been requested
@@ -69,7 +69,7 @@ namespace coldetector
         
         public:
             // Constructor
-            CollisionDetector(cSystem *cam_system);
+            CollisionDetector(cSystem *cam_system,ros::Publisher *pc_pub);
             ~CollisionDetector(){};
 
             //Parameters

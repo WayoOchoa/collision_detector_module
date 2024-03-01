@@ -24,6 +24,9 @@
 #include <message_filters/time_synchronizer.h>
 #include <message_filters/sync_policies/approximate_time.h>
 
+// PointCloud type definition
+typedef pcl::PointCloud<pcl::PointXYZ> PointCloud;
+
 using namespace std;
 
 // Feature computation and Matching parameters
@@ -79,6 +82,10 @@ class CollisionNode{
          * Callable service to transfer data to the collision detection thread
         */
         ros::ServiceServer transfer_frame_data_service_;
+        /**
+         * Point Cloud publisher
+        */
+        ros::Publisher pc_pub_;
 
         // Camera System Definition
         cSystem cam_system_;
@@ -117,8 +124,11 @@ class CollisionNode{
             nh_.getParam("/CameraSystem_nrCams",nrCams);
             cam_system_.setSystemConfig(nrCams,M_c_,K_c_);
 
+            // Publishers initialization
+            pc_pub_ = nh_.advertise<PointCloud>("local_point_cloud",2);
+
             // Starting collision detection thread
-            coldetector = new coldetector::CollisionDetector(&cam_system_);
+            coldetector = new coldetector::CollisionDetector(&cam_system_,&pc_pub_);
             CollisionDetection = new thread(&coldetector::CollisionDetector::Run, coldetector);
 
             // Initializing service for data transfer
@@ -135,7 +145,7 @@ class CollisionNode{
             image_sub_cam4_.subscribe(it_,"/ladybug5/image_color",m_queueSize);
             image_sub_cam5_.subscribe(it_,"/ladybug6/image_color",m_queueSize);
             // Girona Navigation subscribers
-            odometry_sub_.subscribe(nh_,"/dynamics/odometry",m_queueSize); // TODO: ASK why navigator/odometry is not working. is the dynamics one the same?
+            odometry_sub_.subscribe(nh_,"/navigator/odometry",m_queueSize); // TODO: ASK why navigator/odometry is not working. is the dynamics one the same?
             navigation_sub_.subscribe(nh_,"/navigator/navigation",m_queueSize);
             // Sync policy for the camera messages
             m_approximateSync.reset(new ApproximateSync( ApproximatePolicy(policy_queuesize), image_sub_cam0_, image_sub_cam1_,

@@ -28,9 +28,9 @@ DECLARE_double(sigma);
 
 namespace coldetector
 {
-   CollisionDetector::CollisionDetector(cSystem *cam_system):
+   CollisionDetector::CollisionDetector(cSystem *cam_system, ros::Publisher* pc_pub):
    b_new_data_(false), b_do_clahe_(FLAGS_clahe_processing), b_matching_all_all_(FLAGS_matching_all_vs_all), bFinishRequested_(false),
-   b_pointcloud_in_world_(FLAGS_point_cloud_in_world), b_consider_chassis_b_(FLAGS_consider_chassis), cam_system_(cam_system)
+   b_pointcloud_in_world_(FLAGS_point_cloud_in_world), b_consider_chassis_b_(FLAGS_consider_chassis), cam_system_(cam_system), pc_pub_(pc_pub)
    {
       // Robot chasis, critical points initialization
       if(b_consider_chassis_b_) assignChassisPoints();
@@ -96,16 +96,27 @@ namespace coldetector
 
                   if(FLAGS_matching_all_vs_all){
                      ComputeMatchesAllvsAll(descriptors_previous_i,descriptors_current_i,best_matches);
-                     FilterMatchesByEpipolarConstrain(keypoints_previous_i,keypoints_current_i,best_matches,current_Fprevious,filtered_matches);
+                     cout << "bm: " << best_matches.size() << endl;
+                     if(best_matches.size() > 0) {
+                        FilterMatchesByEpipolarConstrain(keypoints_previous_i,keypoints_current_i,best_matches,current_Fprevious,filtered_matches);
+                        cv::Mat img1;
+                        cv::drawMatches(previous_image_cam_i,keypoints_previous_i,current_image_cam_i,keypoints_current_i,filtered_matches,img1);
+                        cv::imshow("Matches",img1);
+                        cv::waitKey(0);
+                     }                
                   }else{
                      // TODO: Epipolar matching
                   }
                   
                   // 4. Triangulation step
-                  cv::Mat triangulated_3dpoints;
-                  TriangulatePoints(base_Tcam, cam_system_->getK_c(cam_id), cam_current_Tcam_previous, keypoints_previous_i, 
-                                    keypoints_current_i, filtered_matches, world_Tcurrent_base, true, triangulated_3dpoints);
-                  final_3d_points.push_back(triangulated_3dpoints);
+                  cout << "fm: " << filtered_matches.size() << endl;
+                  if(filtered_matches.size() > 0){
+                     cv::Mat triangulated_3dpoints;
+                     TriangulatePoints(base_Tcam, cam_system_->getK_c(cam_id), cam_current_Tcam_previous, keypoints_previous_i, 
+                                       keypoints_current_i, filtered_matches, world_Tcurrent_base, true, triangulated_3dpoints);
+                     final_3d_points.push_back(triangulated_3dpoints);
+                     cout << "Z\n";
+                  }
                }
 
                // Convert Mat of Points into PointCloud variable
@@ -117,18 +128,20 @@ namespace coldetector
                   point3d.z = final_3d_points[p].at<double>(2,0);
                   reconstructed_point_cloud->points.push_back(point3d);
                }
+               reconstructed_point_cloud->header.frame_id = "";
                reconstructed_point_cloud->width = (int)reconstructed_point_cloud->points.size();
                reconstructed_point_cloud->height = 1;
+
+               // Publishing data
+               pc_pub_->publish(reconstructed_point_cloud);
             }
             FramesUpdate(current_imgs_frame_);  
          }
-
          // Stops this thread if requested by the main program
          if(CheckifStop()){
             break;
          }
       }
-      
    }
 
    bool CollisionDetector::CheckDataAvailability(){
@@ -150,7 +163,6 @@ namespace coldetector
 
    void CollisionDetector::GetRelativeTransformationBetweenFrames(cv::Mat &base_T_cam, cv::Mat &world_Tprevious_base,
                                                               cv::Mat &world_Tcurrent_base, cv::Mat &cam_previous_T_cam_current){
-
       cv::Mat world_Tprevious_cam = world_Tprevious_base * base_T_cam;
       cv::Mat world_Tcurrent_cam = world_Tcurrent_base * base_T_cam;
 
@@ -246,15 +258,23 @@ namespace coldetector
       std::vector <cv::Point2f> vec_filtered_matches_previous, vec_filtered_matches_current;
       projection_matrices.push_back(P_previous);
       projection_matrices.push_back(P_current);
-      FromMatchesToVectorofPoints(keypoints_current_i,keypoints_current_i,filtered_matches,vec_filtered_matches_previous,vec_filtered_matches_current);
+      cout << "kp1: " << keypoints_previous_i.size() << endl;
+      cout << "kp2: " << keypoints_current_i.size() << endl;
+      cout << "fm: " << filtered_matches.size() << endl;
+      cout << "Proj size: " << projection_matrices.size() << endl;
+      FromMatchesToVectorofPoints(keypoints_previous_i,keypoints_current_i,filtered_matches,vec_filtered_matches_previous,vec_filtered_matches_current);
       std::vector <cv::Mat> vec_filtered_points_2d;
+      cout << "fmp size: " << vec_filtered_matches_previous.size() << endl;
+      cout << "fmc size: " << vec_filtered_matches_current.size() << endl;
       GetArrayOfPoints(vec_filtered_matches_previous, vec_filtered_matches_current, vec_filtered_points_2d);
 
       // Triangulation with OpenCV
       cv::Mat triangulated_points;
+      cout << "D\n";
       cv::sfm::triangulatePoints(vec_filtered_points_2d,projection_matrices,triangulated_points);
 
       /// Check 3D points
+      cout << "E\n";
       for(int pt_i = 0; pt_i < triangulated_points.size().width; pt_i++){
          cv::Mat pt_hom;
          cv::Mat pt_cam_previous, pt_cam_current, pt_cam_current_in_metric_units;
@@ -286,6 +306,7 @@ namespace coldetector
          if(b_to_world) pt_cam_current = world_Tcurrent_base * pt_cam_current;
          triangulated_3dpoints.push_back(pt_cam_current);
       }
+      cout << "F\n";
    }
 
    // Creates the projection matrices out of the Rotation and translation parameters between two frames
