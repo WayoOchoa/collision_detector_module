@@ -8,7 +8,7 @@ using namespace cv;
 using namespace cv::xfeatures2d;
 
 // PointCloud type definition
-typedef pcl::PointCloud<pcl::PointXYZRGB> PointCloud;
+typedef pcl::PointCloud<pcl::PointXYZ> PointCloud;
 
 // Parameters definition
 DECLARE_bool(clahe_processing);
@@ -98,17 +98,27 @@ namespace coldetector
                      ComputeMatchesAllvsAll(descriptors_previous_i,descriptors_current_i,best_matches);
                      FilterMatchesByEpipolarConstrain(keypoints_previous_i,keypoints_current_i,best_matches,current_Fprevious,filtered_matches);
                   }else{
-                     
+                     // TODO: Epipolar matching
                   }
                   
                   // 4. Triangulation step
-
-
-                  // find the projective matrices of both frames
-                  cv::Mat P_previous, P_current;
-
-
+                  cv::Mat triangulated_3dpoints;
+                  TriangulatePoints(base_Tcam, cam_system_->getK_c(cam_id), cam_current_Tcam_previous, keypoints_previous_i, 
+                                    keypoints_current_i, filtered_matches, world_Tcurrent_base, true, triangulated_3dpoints);
+                  final_3d_points.push_back(triangulated_3dpoints);
                }
+
+               // Convert Mat of Points into PointCloud variable
+               if(final_3d_points.size() < 200) continue; // Not enough points were triangulated
+               for(int p = 0; p < final_3d_points.size(); p++){
+                  pcl::PointXYZ point3d;
+                  point3d.x = final_3d_points[p].at<double>(0,0);
+                  point3d.y = final_3d_points[p].at<double>(1,0);
+                  point3d.z = final_3d_points[p].at<double>(2,0);
+                  reconstructed_point_cloud->points.push_back(point3d);
+               }
+               reconstructed_point_cloud->width = (int)reconstructed_point_cloud->points.size();
+               reconstructed_point_cloud->height = 1;
             }
             FramesUpdate(current_imgs_frame_);  
          }
@@ -205,6 +215,11 @@ namespace coldetector
                                  points_previous_i,points_current_i);                      // the function cv::computeCorrespondEpilines requires
       std::vector<cv::Vec3f> lines_current_i;
       cv::computeCorrespondEpilines(points_previous_i, 1, F_matrix,lines_current_i);
+
+      for(int l = 0; l < points_previous_i.size(); l++){
+         double epipole_dist = DistancePointToLine(points_current_i[l],lines_current_i[l]);
+         if(epipole_dist < FLAGS_int_epipolar_dst_thr) filtered_matches.push_back(best_matches[l]);
+      }
    }
 
    // Transform a vector of DMatch into a one of Point2d
@@ -214,6 +229,89 @@ namespace coldetector
               points_frame1.push_back(keypoints_frame1[matches[p].queryIdx].pt);
               points_frame2.push_back(keypoints_frame2[matches[p].trainIdx].pt);
       }
+   }
+
+   // Computation of the orthogonal distance from a point to a line
+   double CollisionDetector::DistancePointToLine( cv::Point2f point, cv::Vec3f epiline){
+      return abs(epiline[0]*point.x + epiline[1]*point.y + epiline[2])/sqrtf(pow(epiline[0],2) + pow(epiline[1],2));
+   }
+
+   void CollisionDetector::TriangulatePoints(cv::Mat &base_Tcam, cv::Mat cam_K, cv::Mat & current_T_previous, std::vector <cv::KeyPoint> &keypoints_previous_i, std::vector <cv::KeyPoint> &keypoints_current_i, 
+                           std::vector<cv::DMatch>& filtered_matches, cv::Mat &world_Tcurrent_base, bool b_to_world, cv::Mat &triangulated_3dpoints){
+      // find the projective matrices of both frames
+      cv::Mat P_previous, P_current;
+      ComputeProjectionMatrices(cam_K,current_T_previous,P_previous,P_current);
+      // Adapting the projection matrices for later use with OpenCV
+      std::vector <cv::Mat> projection_matrices;
+      std::vector <cv::Point2f> vec_filtered_matches_previous, vec_filtered_matches_current;
+      projection_matrices.push_back(P_previous);
+      projection_matrices.push_back(P_current);
+      FromMatchesToVectorofPoints(keypoints_current_i,keypoints_current_i,filtered_matches,vec_filtered_matches_previous,vec_filtered_matches_current);
+      std::vector <cv::Mat> vec_filtered_points_2d;
+      GetArrayOfPoints(vec_filtered_matches_previous, vec_filtered_matches_current, vec_filtered_points_2d);
+
+      // Triangulation with OpenCV
+      cv::Mat triangulated_points;
+      cv::sfm::triangulatePoints(vec_filtered_points_2d,projection_matrices,triangulated_points);
+
+      /// Check 3D points
+      for(int pt_i = 0; pt_i < triangulated_points.size().width; pt_i++){
+         cv::Mat pt_hom;
+         cv::Mat pt_cam_previous, pt_cam_current, pt_cam_current_in_metric_units;
+         sfm::euclideanToHomogeneous(triangulated_points.col(pt_i),pt_hom);
+         sfm::euclideanToHomogeneous(projection_matrices[0]*pt_hom,pt_cam_previous);
+         sfm::euclideanToHomogeneous(projection_matrices[1]*pt_hom,pt_cam_current);
+         // Filter points behind the camera (-z)
+         if(pt_cam_previous.at<double>(2, 0) < 0.0 || pt_cam_current.at<double>(2, 0) < 0.0) continue;
+
+         // Filter points with the reprojection error
+         cv::Point2f feat_img_1 = keypoints_previous_i[filtered_matches[pt_i].queryIdx].pt;
+         cv::Point2f feat_img_2 = keypoints_current_i[filtered_matches[pt_i].trainIdx].pt;
+
+         pt_cam_previous = pt_cam_previous/pt_cam_previous.at<double>(2,0);
+         pt_cam_current = pt_cam_current/pt_cam_current.at<double>(2,0);
+
+         double errXprevious = pt_cam_previous.at<double>(0, 0) - cv::saturate_cast<double>(feat_img_1.x);
+         double errYprevious = pt_cam_previous.at<double>(1, 0) - cv::saturate_cast<double>(feat_img_1.y);
+         double errXcurrent = pt_cam_current.at<double>(0, 0) - cv::saturate_cast<double>(feat_img_2.x);
+         double errYcurrent = pt_cam_current.at<double>(1, 0) - cv::saturate_cast<double>(feat_img_2.y);
+
+         // If the error in x or y is bigger than 4 pixels we skip this point
+         if(cv::sqrt(errXprevious * errXprevious + errYprevious * errYprevious) > 4.0) continue;
+         if(cv::sqrt(errXcurrent * errXcurrent + errYcurrent * errYcurrent) > 4.0) continue;
+
+         // Convert the point in camera frame previous to the current cam frame.
+         pt_cam_current = base_Tcam * current_T_previous * pt_hom;
+         // If the point is referrenced to the world
+         if(b_to_world) pt_cam_current = world_Tcurrent_base * pt_cam_current;
+         triangulated_3dpoints.push_back(pt_cam_current);
+      }
+   }
+
+   // Creates the projection matrices out of the Rotation and translation parameters between two frames
+   void CollisionDetector::ComputeProjectionMatrices(cv::Mat cam_K, cv::Mat &current_T_previous, cv::Mat &P_previous, cv::Mat &P_current){
+      cv::Mat reference = cv::Mat::eye(3,4,CV_64F); // Located at frame 1 at the moment
+      cv::Mat rotation = current_T_previous(cv::Range(0, 3), cv::Range(0, 3) );
+      cv::Mat translation = (cv::Mat_<double>(3,1) << current_T_previous.at<double>(0,3),
+              current_T_previous.at<double>(1,3),
+              current_T_previous.at<double>(2,3));
+      // Projective matrix comes from multiplying the intrinsics by the rotation & translation
+      P_previous =  cam_K * reference;
+      cv::sfm::projectionFromKRt(cam_K,rotation,translation,P_current);
+   }
+
+   // Transform points into a InputArrayOfArrays
+   void CollisionDetector::GetArrayOfPoints(std::vector<cv::Point2f> &points_frame1, std::vector<cv::Point2f> &points_frame2, std::vector<cv::Mat> &array_of_points){
+      cv::Mat points1Mat = (cv::Mat_<double>(2,1) << points_frame1[0].x, points_frame1[0].y);
+      cv::Mat points2Mat = (cv::Mat_<double>(2,1) << points_frame2[0].x, points_frame2[0].y);
+      for(int i=1; i < points_frame1.size(); i++){
+          cv::Mat point1 = (cv::Mat_<double>(2,1) << points_frame1[i].x, points_frame1[i].y);
+          cv::Mat point2 = (cv::Mat_<double>(2,1) << points_frame2[i].x, points_frame2[i].y);
+          cv::hconcat(points1Mat,point1,points1Mat);
+          cv::hconcat(points2Mat,point2,points2Mat);
+      }
+      array_of_points.push_back(points1Mat);
+      array_of_points.push_back(points2Mat);
    }
 
    void CollisionDetector::assignChassisPoints(){
