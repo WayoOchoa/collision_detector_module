@@ -175,7 +175,7 @@ class CollisionNode{
                     0,0,0,1);
             cv::Mat rotation_yaw_matrix = (cv::Mat_<double>(4,4) << cos(yaw),-sin(yaw),0,0,
                     sin(yaw),cos(yaw),0,0,
-                    0,0,0,0,
+                    0,0,1,0,
                     0,0,0,1);
             // Oritentation matrix is defined as R_yaw * R_pitch * R_roll (XYZ)
             cv::Mat world_Trobot_base = rotation_yaw_matrix * rotation_pitch_matrix * rotation_roll_matrix;

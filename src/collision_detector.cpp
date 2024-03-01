@@ -63,21 +63,24 @@ namespace coldetector
                   cv::Mat base_Tcam = cv::Mat(cam_system_->getM_c(cam_id));
                   // Compute the relative transformation between frames
                   cv::Mat cam_previous_Tcam_current(4,4,CV_64F);
-                  GetRelativeTransformationBetweenFrames(base_Tcam,world_Tprevious_base,world_Tcurrent_base,
+                  GetRelativeTransformationBetweenFrames(base_Tcam, world_Tprevious_base, world_Tcurrent_base,
                                                          cam_previous_Tcam_current);
                   cv::Mat cam_current_Tcam_previous = cam_previous_Tcam_current.inv(); // TODO: Check that it is a copy and not a reference
 
                   // 2. Image pre-processing: The image is processed to enhance the contrast and revognize
                   // more features in the image
                   cv::Mat previous_image_cam_i, current_image_cam_i;
+                  cv::Mat gray_previous_image_cam_i, gray_current_image_cam_i;
+                  cv::cvtColor(previous_imgs_frame_.images_[cam_id],gray_previous_image_cam_i,COLOR_BGR2GRAY);
+                  cv::cvtColor(current_imgs_frame_.images_[cam_id],gray_current_image_cam_i,COLOR_BGR2GRAY);
                   if(FLAGS_clahe_processing){
                      cv::Ptr<cv::CLAHE> clahe = cv::createCLAHE();
                      clahe->setClipLimit(2.0);
-                     clahe->apply(previous_imgs_frame_.images_[cam_id], previous_image_cam_i);
-                     clahe->apply(current_imgs_frame_.images_[cam_id], current_image_cam_i);
+                     clahe->apply(gray_previous_image_cam_i, previous_image_cam_i);
+                     clahe->apply(gray_current_image_cam_i, current_image_cam_i);
                   }else{
-                     previous_image_cam_i = previous_imgs_frame_.images_[cam_id];
-                     current_image_cam_i = current_imgs_frame_.images_[cam_id];
+                     previous_image_cam_i = gray_previous_image_cam_i;
+                     current_image_cam_i = gray_current_image_cam_i;
                   }
 
                   // 3. Feature detection and matching
@@ -96,30 +99,26 @@ namespace coldetector
 
                   if(FLAGS_matching_all_vs_all){
                      ComputeMatchesAllvsAll(descriptors_previous_i,descriptors_current_i,best_matches);
-                     cout << "bm: " << best_matches.size() << endl;
                      if(best_matches.size() > 0) {
                         FilterMatchesByEpipolarConstrain(keypoints_previous_i,keypoints_current_i,best_matches,current_Fprevious,filtered_matches);
-                        cv::Mat img1;
-                        cv::drawMatches(previous_image_cam_i,keypoints_previous_i,current_image_cam_i,keypoints_current_i,filtered_matches,img1);
-                        cv::imshow("Matches",img1);
-                        cv::waitKey(0);
+                        //cv::Mat img1;
+                        //cv::drawMatches(previous_image_cam_i,keypoints_previous_i,current_image_cam_i,keypoints_current_i,filtered_matches,img1);
+                        //cv::imshow("Matches",img1);
+                        //cv::waitKey(0);
                      }                
                   }else{
                      // TODO: Epipolar matching
                   }
                   
                   // 4. Triangulation step
-                  cout << "fm: " << filtered_matches.size() << endl;
                   if(filtered_matches.size() > 0){
-                     cv::Mat triangulated_3dpoints;
                      TriangulatePoints(base_Tcam, cam_system_->getK_c(cam_id), cam_current_Tcam_previous, keypoints_previous_i, 
-                                       keypoints_current_i, filtered_matches, world_Tcurrent_base, true, triangulated_3dpoints);
-                     final_3d_points.push_back(triangulated_3dpoints);
-                     cout << "Z\n";
+                                       keypoints_current_i, filtered_matches, world_Tcurrent_base, false, final_3d_points);
                   }
                }
 
                // Convert Mat of Points into PointCloud variable
+               cout << "f3d: " << final_3d_points.size() <<endl;
                if(final_3d_points.size() < 200) continue; // Not enough points were triangulated
                for(int p = 0; p < final_3d_points.size(); p++){
                   pcl::PointXYZ point3d;
@@ -128,12 +127,15 @@ namespace coldetector
                   point3d.z = final_3d_points[p].at<double>(2,0);
                   reconstructed_point_cloud->points.push_back(point3d);
                }
-               reconstructed_point_cloud->header.frame_id = "";
+               reconstructed_point_cloud->header.frame_id = "mcs_tf";
                reconstructed_point_cloud->width = (int)reconstructed_point_cloud->points.size();
                reconstructed_point_cloud->height = 1;
 
                // Publishing data
+               cout << "A\n";
+               cout << "rpc: " << reconstructed_point_cloud->points.size() << endl;
                pc_pub_->publish(reconstructed_point_cloud);
+               cout << "B\n";
             }
             FramesUpdate(current_imgs_frame_);  
          }
@@ -249,7 +251,7 @@ namespace coldetector
    }
 
    void CollisionDetector::TriangulatePoints(cv::Mat &base_Tcam, cv::Mat cam_K, cv::Mat & current_T_previous, std::vector <cv::KeyPoint> &keypoints_previous_i, std::vector <cv::KeyPoint> &keypoints_current_i, 
-                           std::vector<cv::DMatch>& filtered_matches, cv::Mat &world_Tcurrent_base, bool b_to_world, cv::Mat &triangulated_3dpoints){
+                           std::vector<cv::DMatch>& filtered_matches, cv::Mat &world_Tcurrent_base, bool b_to_world, std::vector<cv::Mat> &final_3d_pts){
       // find the projective matrices of both frames
       cv::Mat P_previous, P_current;
       ComputeProjectionMatrices(cam_K,current_T_previous,P_previous,P_current);
@@ -258,23 +260,15 @@ namespace coldetector
       std::vector <cv::Point2f> vec_filtered_matches_previous, vec_filtered_matches_current;
       projection_matrices.push_back(P_previous);
       projection_matrices.push_back(P_current);
-      cout << "kp1: " << keypoints_previous_i.size() << endl;
-      cout << "kp2: " << keypoints_current_i.size() << endl;
-      cout << "fm: " << filtered_matches.size() << endl;
-      cout << "Proj size: " << projection_matrices.size() << endl;
       FromMatchesToVectorofPoints(keypoints_previous_i,keypoints_current_i,filtered_matches,vec_filtered_matches_previous,vec_filtered_matches_current);
       std::vector <cv::Mat> vec_filtered_points_2d;
-      cout << "fmp size: " << vec_filtered_matches_previous.size() << endl;
-      cout << "fmc size: " << vec_filtered_matches_current.size() << endl;
       GetArrayOfPoints(vec_filtered_matches_previous, vec_filtered_matches_current, vec_filtered_points_2d);
 
       // Triangulation with OpenCV
       cv::Mat triangulated_points;
-      cout << "D\n";
       cv::sfm::triangulatePoints(vec_filtered_points_2d,projection_matrices,triangulated_points);
 
       /// Check 3D points
-      cout << "E\n";
       for(int pt_i = 0; pt_i < triangulated_points.size().width; pt_i++){
          cv::Mat pt_hom;
          cv::Mat pt_cam_previous, pt_cam_current, pt_cam_current_in_metric_units;
@@ -304,9 +298,8 @@ namespace coldetector
          pt_cam_current = base_Tcam * current_T_previous * pt_hom;
          // If the point is referrenced to the world
          if(b_to_world) pt_cam_current = world_Tcurrent_base * pt_cam_current;
-         triangulated_3dpoints.push_back(pt_cam_current);
+         final_3d_pts.push_back(pt_cam_current);
       }
-      cout << "F\n";
    }
 
    // Creates the projection matrices out of the Rotation and translation parameters between two frames

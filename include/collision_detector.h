@@ -181,7 +181,7 @@ namespace coldetector
             */
             void TriangulatePoints(cv::Mat &base_Tcam, cv::Mat cam_K, cv::Mat & current_T_previous, std::vector <cv::KeyPoint> &keypoints_previous_i, 
                                 std::vector <cv::KeyPoint> &keypoints_current_i, std::vector<cv::DMatch>& filtered_matches, cv::Mat &world_Tcurrent_base, 
-                                bool b_to_world, cv::Mat &triangulated_3dpoints);
+                                bool b_to_world, std::vector<cv::Mat> &final_3d_pts);
             /**
              * @brief Computes the Projection matrices of two frames.
              * @param cam_K The instrinsic parameters of the camera.
