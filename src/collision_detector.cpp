@@ -35,6 +35,8 @@ namespace coldetector
    {
       // Robot chasis, critical points initialization
       if(b_consider_chassis_b_) assignChassisPoints();
+      previous_imgs_frame_.b_empty = true;
+      current_imgs_frame_.b_empty = true;
    }
 
    void CollisionDetector::Run(){

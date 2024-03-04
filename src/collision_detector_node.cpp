@@ -88,7 +88,6 @@ class CollisionNode{
          * Point Cloud publisher
         */
         ros::Publisher pc_pub_;
-        ros::Publisher pc_pub2_;
 
         // Camera System Definition
         cSystem cam_system_;
@@ -129,7 +128,6 @@ class CollisionNode{
 
             // Publishers initialization
             pc_pub_ = nh_.advertise<collision_detection_module::DescribedPointCloud>("local_point_cloud",2);
-            pc_pub2_ = nh_.advertise<sensor_msgs::PointCloud2>("local_point_cloud2",2);
 
             // Starting collision detection thread
             coldetector = new coldetector::CollisionDetector(&cam_system_,&pc_pub_);
@@ -209,8 +207,9 @@ class CollisionNode{
             }
 
             // Saving image data
+            double timestamp = ros::Time::now().toSec();
             if(!b_frame_incomplete){
-                MultiFrame frame(images,world_Tcamera_base,0); // TODO: Add timestamp, 0 at the moment
+                MultiFrame frame(images,world_Tcamera_base,timestamp); // TODO: Add timestamp, 0 at the moment
                 std::unique_lock<std::mutex> lock(mFrameData);
                 current_frame_ = frame;
             }

@@ -20,4 +20,7 @@
         <remap from="/navigator/odometry" to="/girona500/navigator/odometry"/>
         <remap from="/navigator/navigation" to="/girona500/navigator/navigation"/>
     </node>
+
+    <!--Caller node-->
+    <node name="service_caller" pkg="collision_detection_module" type="service_caller.py" output="screen"/>
 </launch>
