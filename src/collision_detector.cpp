@@ -52,6 +52,7 @@ namespace coldetector
             // Checking that we have already received two frames from the system
             if(!previous_imgs_frame_.b_empty){
                std::vector<cv::Mat> final_3d_points; // Stores the triangulated points
+               cv::Mat points_descriptors; // The descriptor corresponding to each traingulated 3D point
 
                /// Get camera base poses w.r.t. the world
                cv::Mat world_Tcurrent_base = cv::Mat(current_imgs_frame_.world_Tcamera_base_);
@@ -102,10 +103,6 @@ namespace coldetector
                      ComputeMatchesAllvsAll(descriptors_previous_i,descriptors_current_i,best_matches);
                      if(best_matches.size() > 0) {
                         FilterMatchesByEpipolarConstrain(keypoints_previous_i,keypoints_current_i,best_matches,current_Fprevious,filtered_matches);
-                        //cv::Mat img1;
-                        //cv::drawMatches(previous_image_cam_i,keypoints_previous_i,current_image_cam_i,keypoints_current_i,filtered_matches,img1);
-                        //cv::imshow("Matches",img1);
-                        //cv::waitKey(0);
                      }                
                   }else{
                      // TODO: Epipolar matching
@@ -114,26 +111,38 @@ namespace coldetector
                   // 4. Triangulation step
                   if(filtered_matches.size() > 0){
                      TriangulatePoints(base_Tcam, cam_system_->getK_c(cam_id), cam_current_Tcam_previous, keypoints_previous_i, 
-                                       keypoints_current_i, filtered_matches, world_Tcurrent_base, false, final_3d_points);
+                                       keypoints_current_i, descriptors_previous_i, descriptors_current_i,
+                                       filtered_matches, world_Tcurrent_base, false, final_3d_points, points_descriptors);
                   }
                }
 
                // Convert Mat of Points into PointCloud variable
                if(final_3d_points.size() < 200) continue; // Not enough points were triangulated
+
+               // Prepare data for publishing it into ROS
+               // Point Cloud conversion
                collision_detection_module::DescribedPointCloud msg;
+               sensor_msgs::PointCloud2 pcl2_msg;
+               sensor_msgs::PointCloud pcl_msg;
+               
                for(int p = 0; p < final_3d_points.size(); p++){
-                  pcl::PointXYZ point3d;
-                  point3d.x = final_3d_points[p].at<double>(0,0);
-                  point3d.y = final_3d_points[p].at<double>(1,0);
-                  point3d.z = final_3d_points[p].at<double>(2,0);
-                  reconstructed_point_cloud->points.push_back(point3d);
+                  geometry_msgs::Point32 point;
+                  point.x = final_3d_points[p].at<double>(0,0);
+                  point.y = final_3d_points[p].at<double>(1,0);
+                  point.z = final_3d_points[p].at<double>(2,0);
+                  pcl_msg.points.push_back(point);
                }
-               reconstructed_point_cloud->header.frame_id = "mcs_tf";
-               reconstructed_point_cloud->width = (int)reconstructed_point_cloud->points.size();
-               reconstructed_point_cloud->height = 1;
+               pcl_msg.header.frame_id = "mcs_tf";
+               sensor_msgs::convertPointCloudToPointCloud2(pcl_msg,pcl2_msg);
+               msg.points3d = pcl2_msg;
+
+               // Converting descriptors
+               msg.descriptor_length = points_descriptors.rows;
+               msg.num_descriptors = points_descriptors.cols;
+               msg.descriptors.assign(points_descriptors.begin<double>(),points_descriptors.end<double>());
 
                // Publishing data
-               //pc_pub_->publish(reconstructed_point_cloud);
+               pc_pub_->publish(msg);
             }
             FramesUpdate(current_imgs_frame_);  
          }
@@ -249,7 +258,8 @@ namespace coldetector
    }
 
    void CollisionDetector::TriangulatePoints(cv::Mat &base_Tcam, cv::Mat cam_K, cv::Mat & current_T_previous, std::vector <cv::KeyPoint> &keypoints_previous_i, std::vector <cv::KeyPoint> &keypoints_current_i, 
-                           std::vector<cv::DMatch>& filtered_matches, cv::Mat &world_Tcurrent_base, bool b_to_world, std::vector<cv::Mat> &final_3d_pts){
+                           cv::Mat &descriptors_previous_i, cv::Mat &descriptors_current_i, std::vector<cv::DMatch>& filtered_matches, cv::Mat &world_Tcurrent_base, bool b_to_world, 
+                           std::vector<cv::Mat> &final_3d_pts, cv::Mat &final_descriptors){
       // find the projective matrices of both frames
       cv::Mat P_previous, P_current;
       ComputeProjectionMatrices(cam_K,current_T_previous,P_previous,P_current);
@@ -297,6 +307,9 @@ namespace coldetector
          // If the point is referrenced to the world
          if(b_to_world) pt_cam_current = world_Tcurrent_base * pt_cam_current;
          final_3d_pts.push_back(pt_cam_current);
+
+         // Adding the descriptor of the point
+         final_descriptors.push_back(descriptors_current_i.row(filtered_matches[pt_i].trainIdx));
       }
    }
 

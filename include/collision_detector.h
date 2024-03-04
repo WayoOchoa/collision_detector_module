@@ -24,6 +24,11 @@
 #include <pcl/point_types.h>
 #include <pcl_conversions/pcl_conversions.h>
 #include <pcl_ros/io/pcd_io.h>
+#include <sensor_msgs/PointCloud2.h>
+#include <sensor_msgs/PointField.h>
+#include <sensor_msgs/point_cloud2_iterator.h>
+#include <sensor_msgs/point_cloud_conversion.h>
+#include <geometry_msgs/Point32.h>
 
 // Gflags
 #include <gflags/gflags.h>
@@ -180,8 +185,9 @@ namespace coldetector
              * @param triangulated_3dpoints Output array with the correspondent 3D point
             */
             void TriangulatePoints(cv::Mat &base_Tcam, cv::Mat cam_K, cv::Mat & current_T_previous, std::vector <cv::KeyPoint> &keypoints_previous_i, 
-                                std::vector <cv::KeyPoint> &keypoints_current_i, std::vector<cv::DMatch>& filtered_matches, cv::Mat &world_Tcurrent_base, 
-                                bool b_to_world, std::vector<cv::Mat> &final_3d_pts);
+                                std::vector <cv::KeyPoint> &keypoints_current_i, cv::Mat &descriptors_previous_i, cv::Mat &descriptors_current_i, 
+                                std::vector<cv::DMatch>& filtered_matches, cv::Mat &world_Tcurrent_base, 
+                                bool b_to_world, std::vector<cv::Mat> &final_3d_pts, cv::Mat &final_descriptors);
             /**
              * @brief Computes the Projection matrices of two frames.
              * @param cam_K The instrinsic parameters of the camera.

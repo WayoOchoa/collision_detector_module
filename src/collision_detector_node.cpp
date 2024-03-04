@@ -88,6 +88,7 @@ class CollisionNode{
          * Point Cloud publisher
         */
         ros::Publisher pc_pub_;
+        ros::Publisher pc_pub2_;
 
         // Camera System Definition
         cSystem cam_system_;
@@ -128,6 +129,7 @@ class CollisionNode{
 
             // Publishers initialization
             pc_pub_ = nh_.advertise<collision_detection_module::DescribedPointCloud>("local_point_cloud",2);
+            pc_pub2_ = nh_.advertise<sensor_msgs::PointCloud2>("local_point_cloud2",2);
 
             // Starting collision detection thread
             coldetector = new coldetector::CollisionDetector(&cam_system_,&pc_pub_);
