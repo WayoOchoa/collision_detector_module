@@ -106,6 +106,9 @@ class CollisionNode{
 
         // mutex variables
         std::mutex mFrameData;
+        // Flags
+        bool b_stop_request_;
+        bool b_new_data_;
 
     public:
         // Constructor
@@ -118,7 +121,7 @@ class CollisionNode{
          * @param nh Node handle for the ROS object.
         */
         CollisionNode(ros::NodeHandle &nh): 
-        nh_(nh), it_(nh){
+        nh_(nh), it_(nh), b_stop_request_(false){
             loadParameters();
 
             //Setting the cam system
@@ -154,7 +157,7 @@ class CollisionNode{
                 image_sub_cam2_, image_sub_cam3_, image_sub_cam4_, image_sub_cam5_, odometry_sub_, navigation_sub_));
             m_approximateSync->registerCallback(boost::bind(&CollisionNode::SyncImageCallback, this, _1, _2, _3, _4, _5, _6, _7, _8));
         };
-        ~CollisionNode(){};
+        ~CollisionNode(){m_approximateSync.reset();};
 
         /**
          * Reads the images coming from the simulator.
@@ -165,6 +168,7 @@ class CollisionNode{
             const sensor_msgs::ImageConstPtr& msg3,const sensor_msgs::ImageConstPtr& msg4,const sensor_msgs::ImageConstPtr& msg5,
             const nav_msgs::OdometryConstPtr& odometry_msg, const cola2_msgs::NavStsConstPtr& navigation_msg){
             bool b_frame_incomplete = false;
+
             // Defining the current pose of the robot
             double roll = navigation_msg->orientation.roll, pitch = navigation_msg->orientation.pitch, yaw = navigation_msg->orientation.yaw;
             cv::Mat rotation_roll_matrix = (cv::Mat_<double>(4,4) << 1,0,0,0,
@@ -208,10 +212,13 @@ class CollisionNode{
 
             // Saving image data
             double timestamp = ros::Time::now().toSec();
-            if(!b_frame_incomplete){
-                MultiFrame frame(images,world_Tcamera_base,timestamp); // TODO: Add timestamp, 0 at the moment
-                std::unique_lock<std::mutex> lock(mFrameData);
-                current_frame_ = frame;
+            if(!b_frame_incomplete && !b_stop_request_){
+                MultiFrame frame(images,world_Tcamera_base,timestamp);
+                {
+                    std::lock_guard<std::mutex> lock(mFrameData);
+                    b_new_data_ = true;
+                    current_frame_ = frame;
+                }
             }
         }
         /**
@@ -221,10 +228,16 @@ class CollisionNode{
         bool TransferDataCallback(collision_detection_module::TransferData::Request & req,
                                 collision_detection_module::TransferData::Response & res){
             // Transferring current image and pose to the collision Detection thread
-            std::unique_lock<std::mutex> lock(mFrameData);
-            coldetector->transferData(current_frame_, req.send_data);
-            res.complete = true;
-            return true;
+            if(b_new_data_)
+            {
+                std::lock_guard<std::mutex> lock(mFrameData);
+                coldetector->transferData(current_frame_, req.send_data);
+                b_new_data_ = false;
+                res.complete = true;
+                return true;
+            }else{
+                return true;
+            }
         }
 
         /**
@@ -285,7 +298,11 @@ class CollisionNode{
          * Makes the request to stop all working threads
         */
         void RequestStop(){
+            b_stop_request_ = true;
             coldetector->StopRequest();
+            if(CollisionDetection->joinable()){
+                CollisionDetection->join();
+            }
         }
 
 };
@@ -300,10 +317,11 @@ int main(int argc, char** argv){
 
     CollisionNode my_collision_node(nh);
 
-    ros::spin();
+    while(ros::ok()) ros::spin();
     
     // Stop all thread when ROS stops working
     my_collision_node.RequestStop();
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
 
     return 0;
 }

@@ -48,13 +48,17 @@ namespace coldetector
       {
          bool b_new_pc_data = false; // Variable to control if a PointCloud was successfully computed
          if(CheckDataAvailability()){ // Check if there is new data available from the robot
-            current_imgs_frame_ = new_frame_data_; // Set the current frame to the newly received data.
+            {
+               std::lock_guard<std::mutex> lock(mReceiveData);
+               current_imgs_frame_ = new_frame_data_; // Set the current frame to the newly received data.
+            }
             reconstructed_point_cloud.reset(new PointCloud);
 
             // Checking that we have already received two frames from the system
             if(!previous_imgs_frame_.b_empty){
                std::vector<cv::Mat> final_3d_points; // Stores the triangulated points
                cv::Mat points_descriptors; // The descriptor corresponding to each traingulated 3D point
+               std::vector<int> cam_num_features; // How many features where considered for camera i
 
                /// Get camera base poses w.r.t. the world
                cv::Mat world_Tcurrent_base = cv::Mat(current_imgs_frame_.world_Tcamera_base_);
@@ -115,6 +119,8 @@ namespace coldetector
                      TriangulatePoints(base_Tcam, cam_system_->getK_c(cam_id), cam_current_Tcam_previous, keypoints_previous_i, 
                                        keypoints_current_i, descriptors_previous_i, descriptors_current_i,
                                        filtered_matches, world_Tcurrent_base, false, final_3d_points, points_descriptors);
+                     cam_num_features.push_back(final_3d_points.size());
+
                   }
                }
 
@@ -139,9 +145,11 @@ namespace coldetector
                msg.points3d = pcl2_msg;
 
                // Converting descriptors
-               msg.descriptor_length = points_descriptors.rows;
-               msg.num_descriptors = points_descriptors.cols;
-               msg.descriptors.assign(points_descriptors.begin<double>(),points_descriptors.end<double>());
+               msg.num_descriptors = points_descriptors.rows;
+               msg.descriptor_length = points_descriptors.cols;
+               msg.cam_num_features = cam_num_features;
+                
+               msg.descriptors.assign(points_descriptors.begin<float>(),points_descriptors.end<float>());
 
                // Publishing data
                pc_pub_->publish(msg);
@@ -156,24 +164,25 @@ namespace coldetector
    }
 
    bool CollisionDetector::CheckDataAvailability(){
-      std::unique_lock<std::mutex> lock(mReceiveData);
-      bool temp = b_new_data_;
-      if(b_new_data_){
-         new_frame_data_ = data_current_frame_imgs;
-         b_new_data_= false;
-      }
-
+         std::lock_guard<std::mutex> lock(mReceiveData);
+         bool temp = b_new_data_;
+         if(b_new_data_){
+            new_frame_data_ = data_current_frame_imgs;
+            b_new_data_= false;
+         }
       return temp;
    }
 
-   void CollisionDetector::transferData(MultiFrame &F, bool new_data){
-      std::unique_lock<std::mutex> lock(mReceiveData);
-      b_new_data_ = new_data;
-      data_current_frame_imgs = F;
+   void CollisionDetector::transferData(const MultiFrame &F, bool new_data){
+      {
+         std::lock_guard<std::mutex> lock(mReceiveData);
+         b_new_data_ = new_data;
+         data_current_frame_imgs = F;
+      }
    }
 
-   void CollisionDetector::GetRelativeTransformationBetweenFrames(cv::Mat &base_T_cam, cv::Mat &world_Tprevious_base,
-                                                              cv::Mat &world_Tcurrent_base, cv::Mat &cam_previous_T_cam_current){
+   void CollisionDetector::GetRelativeTransformationBetweenFrames(const cv::Mat &base_T_cam, const cv::Mat &world_Tprevious_base,
+                                                              const cv::Mat &world_Tcurrent_base, cv::Mat &cam_previous_T_cam_current){
       cv::Mat world_Tprevious_cam = world_Tprevious_base * base_T_cam;
       cv::Mat world_Tcurrent_cam = world_Tcurrent_base * base_T_cam;
 
@@ -181,7 +190,7 @@ namespace coldetector
       cam_previous_T_cam_current = world_Tprevious_cam.inv() * world_Tcurrent_cam;
    }
 
-   void CollisionDetector::ComputeFeatures(cv::Mat &previous_image_cam_i, cv::Mat &current_image_cam_i, std::vector <cv::KeyPoint> &keypoints_previous_i, 
+   void CollisionDetector::ComputeFeatures(const cv::Mat &previous_image_cam_i, const cv::Mat &current_image_cam_i, std::vector <cv::KeyPoint> &keypoints_previous_i, 
                            std::vector <cv::KeyPoint> &keypoints_current_i, cv::Mat &descriptors_previous_i, cv::Mat &descriptors_current_i){
       // Obtains the keypoints and descriptors of the previous_image_frame and current_image_frame
       if(FLAGS_detector_type == "SIFT"){
@@ -198,7 +207,7 @@ namespace coldetector
    }
 
    // Computes the fundamental matrix between two frames given the transformation matrix
-   void CollisionDetector::ComputeFundamentalMatrix(cv::Mat & current_T_previous, cv::Mat cam_K, cv::Mat &current_F_previous){
+   void CollisionDetector::ComputeFundamentalMatrix(const cv::Mat & current_T_previous, const cv::Mat cam_K, cv::Mat &current_F_previous){
        // https://sourishghosh.com/2016/fundamental-matrix-from-camera-matrices/
        cv::Mat rotation = current_T_previous(cv::Range(0, 3), cv::Range(0, 3) );
        cv::Mat translation = (cv::Mat_<double>(3,1) << current_T_previous.at<double>(0,3),
@@ -212,7 +221,7 @@ namespace coldetector
        current_F_previous = current_F_previous/current_F_previous.at<double>(2,2);
    }
 
-   void CollisionDetector::ComputeMatchesAllvsAll(cv::Mat &descriptors_previous_i, cv::Mat &descriptors_current_i, std::vector<cv::DMatch>& best_matches){
+   void CollisionDetector::ComputeMatchesAllvsAll(const cv::Mat &descriptors_previous_i, const cv::Mat &descriptors_current_i, std::vector<cv::DMatch>& best_matches){
       // Performs the matching algorithm of all descriptors of one image against all descriptors of a second one
       if(FLAGS_detector_type == "SIFT" || FLAGS_detector_type == "SURF"){
          // Matching the desriptors using FLANN matcher
@@ -230,8 +239,8 @@ namespace coldetector
       }
    }
 
-   void CollisionDetector::FilterMatchesByEpipolarConstrain(std::vector <cv::KeyPoint> &keypoints_previous_i, std::vector <cv::KeyPoint> &keypoints_current_i, 
-                           std::vector<cv::DMatch> &best_matches, cv::Mat &F_matrix, std::vector<cv::DMatch>& filtered_matches){
+   void CollisionDetector::FilterMatchesByEpipolarConstrain(const std::vector <cv::KeyPoint> &keypoints_previous_i, const std::vector <cv::KeyPoint> &keypoints_current_i, 
+                           const std::vector<cv::DMatch> &best_matches, const cv::Mat &F_matrix, std::vector<cv::DMatch>& filtered_matches){
       // Compute epipolar lines on the current image frame
       std::vector<cv::Point2f> points_previous_i, points_current_i;
       FromMatchesToVectorofPoints(keypoints_previous_i, keypoints_current_i, best_matches, // Transforms the matches into the correspondent input that
@@ -246,8 +255,8 @@ namespace coldetector
    }
 
    // Transform a vector of DMatch into a one of Point2d
-   void CollisionDetector::FromMatchesToVectorofPoints(std::vector<cv::KeyPoint> &keypoints_frame1, std::vector<cv::KeyPoint> &keypoints_frame2,
-                                    std::vector<cv::DMatch> &matches, std::vector <cv::Point2f> &points_frame1,std::vector <cv::Point2f> &points_frame2){
+   void CollisionDetector::FromMatchesToVectorofPoints(const std::vector<cv::KeyPoint> &keypoints_frame1, const std::vector<cv::KeyPoint> &keypoints_frame2,
+                                    const std::vector<cv::DMatch> &matches, std::vector <cv::Point2f> &points_frame1,std::vector <cv::Point2f> &points_frame2){
       for (int p = 0; p < (int)matches.size(); p++) {
               points_frame1.push_back(keypoints_frame1[matches[p].queryIdx].pt);
               points_frame2.push_back(keypoints_frame2[matches[p].trainIdx].pt);
@@ -255,12 +264,12 @@ namespace coldetector
    }
 
    // Computation of the orthogonal distance from a point to a line
-   double CollisionDetector::DistancePointToLine( cv::Point2f point, cv::Vec3f epiline){
+   double CollisionDetector::DistancePointToLine( const cv::Point2f point, const cv::Vec3f epiline){
       return abs(epiline[0]*point.x + epiline[1]*point.y + epiline[2])/sqrtf(pow(epiline[0],2) + pow(epiline[1],2));
    }
 
-   void CollisionDetector::TriangulatePoints(cv::Mat &base_Tcam, cv::Mat cam_K, cv::Mat & current_T_previous, std::vector <cv::KeyPoint> &keypoints_previous_i, std::vector <cv::KeyPoint> &keypoints_current_i, 
-                           cv::Mat &descriptors_previous_i, cv::Mat &descriptors_current_i, std::vector<cv::DMatch>& filtered_matches, cv::Mat &world_Tcurrent_base, bool b_to_world, 
+   void CollisionDetector::TriangulatePoints(const cv::Mat &base_Tcam, const cv::Mat cam_K, const cv::Mat & current_T_previous, const std::vector <cv::KeyPoint> &keypoints_previous_i, const std::vector <cv::KeyPoint> &keypoints_current_i, 
+                           const cv::Mat &descriptors_previous_i, const cv::Mat &descriptors_current_i, const std::vector<cv::DMatch>& filtered_matches, const cv::Mat &world_Tcurrent_base, bool b_to_world, 
                            std::vector<cv::Mat> &final_3d_pts, cv::Mat &final_descriptors){
       // find the projective matrices of both frames
       cv::Mat P_previous, P_current;
@@ -316,7 +325,7 @@ namespace coldetector
    }
 
    // Creates the projection matrices out of the Rotation and translation parameters between two frames
-   void CollisionDetector::ComputeProjectionMatrices(cv::Mat cam_K, cv::Mat &current_T_previous, cv::Mat &P_previous, cv::Mat &P_current){
+   void CollisionDetector::ComputeProjectionMatrices(const cv::Mat cam_K, const cv::Mat &current_T_previous, cv::Mat &P_previous, cv::Mat &P_current){
       cv::Mat reference = cv::Mat::eye(3,4,CV_64F); // Located at frame 1 at the moment
       cv::Mat rotation = current_T_previous(cv::Range(0, 3), cv::Range(0, 3) );
       cv::Mat translation = (cv::Mat_<double>(3,1) << current_T_previous.at<double>(0,3),
@@ -378,18 +387,22 @@ namespace coldetector
    // Update the Keyframes of a moment in time
    void CollisionDetector::FramesUpdate(MultiFrame &current_frame)
    {
-      std::unique_lock<std::mutex> lock(mReceiveData);
-      previous_imgs_frame_ = current_frame;
-      previous_imgs_frame_.b_empty = false;
+      {
+         std::lock_guard<std::mutex> lock(mReceiveData);
+         previous_imgs_frame_ = current_frame;
+         previous_imgs_frame_.b_empty = false;
+      }
 	}
 
    void CollisionDetector::StopRequest(){
-        unique_lock<mutex> lock(mMutexStop);
+      {
+        lock_guard<mutex> lock(mMutexStop);
         bFinishRequested_ = true;
+      }
     }
 
     bool CollisionDetector::CheckifStop(){
-        unique_lock<mutex> lock(mMutexStop);
+        lock_guard<mutex> lock(mMutexStop);
         return bFinishRequested_;
     }
 }

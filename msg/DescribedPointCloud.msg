@@ -1,4 +1,5 @@
 sensor_msgs/PointCloud2 points3d
 float64[] descriptors
+int32[] cam_num_features
 int32 descriptor_length
 int32 num_descriptors

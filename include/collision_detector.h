@@ -105,7 +105,7 @@ namespace coldetector
              * camera.
              * @param new_data Flag that indicates that new data has been received.
             */
-            void transferData(MultiFrame &F, bool new_data);
+            void transferData(const MultiFrame &F, bool new_data);
             /**
              * @brief Updates the previous_frame data with the current_frame that was already processed.
              * @param current_frame Frame data corresponding to the newly processed data.
@@ -118,8 +118,8 @@ namespace coldetector
              * @param world_Tcurrent_base Transformation of the camera origin w.r.t the world on the current frame.
              * @param cam_previous_T_cam_current Output relative transformation matrix.
             */
-            void GetRelativeTransformationBetweenFrames(cv::Mat &base_T_cam, cv::Mat &world_Tprevious_base,
-                                                        cv::Mat &world_Tcurrent_base, cv::Mat &cam_previous_T_cam_current);
+            void GetRelativeTransformationBetweenFrames(const cv::Mat &base_T_cam, const cv::Mat &world_Tprevious_base,
+                                                        const cv::Mat &world_Tcurrent_base, cv::Mat &cam_previous_T_cam_current);
             /**
              * @brief Compute keypoints and its descriptors in two images.
              * @param previous_image_cam_i Image of camera i in the previous frame.
@@ -129,7 +129,7 @@ namespace coldetector
              * @param descriptors_previous_i Output vector of corresponding descriptors on previous frame.
              * @param descriptors_current_i Output vector of corresponding descriptors on current frame.
             */
-            void ComputeFeatures(cv::Mat &previous_image_cam_i, cv::Mat &current_image_cam_i, std::vector <cv::KeyPoint> &keypoints_previous_i, 
+            void ComputeFeatures(const cv::Mat &previous_image_cam_i, const cv::Mat &current_image_cam_i, std::vector <cv::KeyPoint> &keypoints_previous_i, 
                                 std::vector <cv::KeyPoint> &keypoints_current_i, cv::Mat &descriptors_previous_i, cv::Mat &descriptors_current_i);
             /**
              * @brief Compute the Fundamental matrix between two frames given their relative transformation matrix
@@ -137,14 +137,14 @@ namespace coldetector
              * @param cam_K The instrinsic parameters of the camera.
              * @param current_F_previous Output Fundamental matrix of the previous frame w.r.t. the current frame.
             */
-            void ComputeFundamentalMatrix(cv::Mat & current_T_previous, cv::Mat cam_K, cv::Mat &current_F_previous);
+            void ComputeFundamentalMatrix(const cv::Mat & current_T_previous, const cv::Mat cam_K, cv::Mat &current_F_previous);
             /**
              * @brief Performs Brute force matching (all vs all) from a set of previous_keypoints and current_keypoints
              * @param descriptors_previous_i Descriptors computed on the previous frame.
              * @param descriptors_current_i Descriptors computed on the current frame.
              * @param best_matches Output vector with matches that satisfy the Lowe's ratio test.
             */
-            void ComputeMatchesAllvsAll(cv::Mat &descriptors_previous_i, cv::Mat &descriptors_current_i, std::vector<cv::DMatch>& best_matches);
+            void ComputeMatchesAllvsAll(const cv::Mat &descriptors_previous_i, const cv::Mat &descriptors_current_i, std::vector<cv::DMatch>& best_matches);
             /**
              * @brief Uses epipolar geometry to filter the matches from a set of two images.
              * @param keypoints_previous_i Features detected on previous frame.
@@ -153,8 +153,8 @@ namespace coldetector
              * @param F_matrix Fundamental matrix of the previous frame w.r.t. the current frame.
              * @param filtered_matches Output vector with all the feature matches that satisfy the epipolar constraint.
             */
-            void FilterMatchesByEpipolarConstrain(std::vector <cv::KeyPoint> &keypoints_previous_i, std::vector <cv::KeyPoint> &keypoints_current_i, 
-                                                std::vector<cv::DMatch> &best_matches, cv::Mat &F_matrix, std::vector<cv::DMatch>& filtered_matches);
+            void FilterMatchesByEpipolarConstrain(const std::vector <cv::KeyPoint> &keypoints_previous_i, const std::vector <cv::KeyPoint> &keypoints_current_i, 
+                                                const std::vector<cv::DMatch> &best_matches, const cv::Mat &F_matrix, std::vector<cv::DMatch>& filtered_matches);
             /**
              * @brief Transforms a vector of DMatch type into a Point2d object
              * @param keypoints_frame1 Features detected on frame 1.
@@ -163,15 +163,15 @@ namespace coldetector
              * @param points_frame1 Output vector of cv::Point2f 2D points on frame 1.
              * @param points_frame2 Output vector of cv::Point2f 2D points on frame 2.
             */
-            void FromMatchesToVectorofPoints(std::vector<cv::KeyPoint> &keypoints_frame1, std::vector<cv::KeyPoint> &keypoints_frame2,
-                                    std::vector<cv::DMatch> &matches, std::vector <cv::Point2f> &points_frame1,std::vector <cv::Point2f> &points_frame2);
+            void FromMatchesToVectorofPoints(const std::vector<cv::KeyPoint> &keypoints_frame1, const std::vector<cv::KeyPoint> &keypoints_frame2,
+                                    const std::vector<cv::DMatch> &matches, std::vector <cv::Point2f> &points_frame1,std::vector <cv::Point2f> &points_frame2);
             /**
              * @brief Computes the orthogonal distances from a 2D point to a line
              * @param point The 2D point in the image.
              * @param epiline The corresponding epipolar line.
              * @return distance The orthogonal distance from the point to the line.
             */
-            double DistancePointToLine(cv::Point2f point, cv::Vec3f epiline);
+            double DistancePointToLine(const cv::Point2f point, const cv::Vec3f epiline);
             /**
              * @brief Triangulate 3D points from a set of corresponding 2D matches.
              * @param base_Tcam Extrinsic camera parametes.
@@ -184,9 +184,9 @@ namespace coldetector
              * @param b_to_world Flag to indicate if the final point cloud should be referenced to the world.
              * @param triangulated_3dpoints Output array with the correspondent 3D point
             */
-            void TriangulatePoints(cv::Mat &base_Tcam, cv::Mat cam_K, cv::Mat & current_T_previous, std::vector <cv::KeyPoint> &keypoints_previous_i, 
-                                std::vector <cv::KeyPoint> &keypoints_current_i, cv::Mat &descriptors_previous_i, cv::Mat &descriptors_current_i, 
-                                std::vector<cv::DMatch>& filtered_matches, cv::Mat &world_Tcurrent_base, 
+            void TriangulatePoints(const cv::Mat &base_Tcam, const cv::Mat cam_K, const cv::Mat & current_T_previous, const std::vector <cv::KeyPoint> &keypoints_previous_i, 
+                                const std::vector <cv::KeyPoint> &keypoints_current_i, const cv::Mat &descriptors_previous_i, const cv::Mat &descriptors_current_i, 
+                                const std::vector<cv::DMatch>& filtered_matches, const cv::Mat &world_Tcurrent_base, 
                                 bool b_to_world, std::vector<cv::Mat> &final_3d_pts, cv::Mat &final_descriptors);
             /**
              * @brief Computes the Projection matrices of two frames.
@@ -195,7 +195,7 @@ namespace coldetector
              * @param P_previous Output Projection matrix of the previous frame.
              * @param P_current Output Projection matrix of the current frame.
             */
-            void ComputeProjectionMatrices(cv::Mat cam_K, cv::Mat &current_T_previous, cv::Mat &P_previous, cv::Mat &P_current);
+            void ComputeProjectionMatrices(const cv::Mat cam_K, const cv::Mat &current_T_previous, cv::Mat &P_previous, cv::Mat &P_current);
             /**
              * @brief Adjust a set of cv:Point2f vector arrays into an InputArrayOfArrays object.
              * @param points_frame1 of cv::Point2f 2D points on frame 1.
