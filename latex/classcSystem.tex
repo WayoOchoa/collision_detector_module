@@ -1,0 +1,188 @@
+\hypertarget{classcSystem}{}\section{c\+System Class Reference}
+\label{classcSystem}\index{c\+System@{c\+System}}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classcSystem_a6d79f7297df51a1c01eda770ee35f787}{c\+System} ()
+\begin{DoxyCompactList}\small\item\em Default constructor. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{classcSystem_af2cdf72ac6ea96ce574cc6f7dfe06f8e}\label{classcSystem_af2cdf72ac6ea96ce574cc6f7dfe06f8e}} 
+\hyperlink{classcSystem_af2cdf72ac6ea96ce574cc6f7dfe06f8e}{$\sim$c\+System} ()
+\begin{DoxyCompactList}\small\item\em Default destructor of a \hyperlink{classcSystem}{c\+System} object. \end{DoxyCompactList}\item 
+\hyperlink{classcSystem_a05f411bbf675671c4285dfd855eb9e84}{c\+System} (const std\+::string \&path2calib)
+\begin{DoxyCompactList}\small\item\em Constructor. \end{DoxyCompactList}\item 
+void \hyperlink{classcSystem_adf0d3a26903fdcbf038e2d2f4334f60f}{Load\+M\+CS} (const std\+::string path2calib)
+\begin{DoxyCompactList}\small\item\em Loads the cameras calibration parameters from the configuration files. \end{DoxyCompactList}\item 
+void \hyperlink{classcSystem_a77c7c0e0aef5a2ca046e3f562c847f72}{set\+System\+Config} (int num\+Cams, std\+::vector$<$ cv\+::\+Matx61d $>$ cayley\+\_\+calibration\+\_\+params, std\+::vector$<$ cv\+::\+Matx41d $>$ intrinsic\+\_\+params)
+\begin{DoxyCompactList}\small\item\em Set the camera system configuration. \end{DoxyCompactList}\item 
+cv\+::\+Mat \hyperlink{classcSystem_a2c5e497f4a8fd27d9a4a67f8de329b02}{get\+K\+\_\+c} (int cam)
+\item 
+cv\+::\+Matx44d \hyperlink{classcSystem_ad98d9a5cca9c20536605a7e7800db04f}{get\+M\+\_\+c} (int cam)
+\item 
+int \hyperlink{classcSystem_ae1fa352a5d3ac3a9ce3d4dc1d0d3ee08}{get\+\_\+nr\+Cams} ()
+\item 
+{\footnotesize template$<$typename T $>$ }\\cv\+::\+Matx$<$ T, 4, 4 $>$ \hyperlink{classcSystem_ad08b05bd8f360a671094b7ab6a1b08db}{cayley2hom} (const cv\+::\+Matx$<$ T, 6, 1 $>$ \&cayley\+Rep)
+\item 
+{\footnotesize template$<$typename T $>$ }\\cv\+::\+Matx$<$ T, 3, 3 $>$ \hyperlink{classcSystem_aaa6ff4626fafe84a7c0e3d9d892500cf}{cayley2rot} (const cv\+::\+Matx$<$ T, 3, 1 $>$ \&cay\+Param\+In)
+\item 
+cv\+::\+Mat\+\_\+$<$ double $>$ \hyperlink{classcSystem_a2cc39fd195d94873333c459da47d8244}{set\+Pinhole\+Camera\+Matrix} (const double fx, const double fy, const double px, const double py)
+\end{DoxyCompactItemize}
+
+
+\subsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{classcSystem_a6d79f7297df51a1c01eda770ee35f787}\label{classcSystem_a6d79f7297df51a1c01eda770ee35f787}} 
+\index{c\+System@{c\+System}!c\+System@{c\+System}}
+\index{c\+System@{c\+System}!c\+System@{c\+System}}
+\subsubsection{\texorpdfstring{c\+System()}{cSystem()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily c\+System\+::c\+System (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Default constructor. 
+
+Create a new \hyperlink{classcSystem}{c\+System} object. \begin{DoxySeeAlso}{See also}
+\hyperlink{classcSystem_a05f411bbf675671c4285dfd855eb9e84}{c\+System(const std\+::string\& path2calib)} 
+
+
+\end{DoxySeeAlso}
+\mbox{\Hypertarget{classcSystem_a05f411bbf675671c4285dfd855eb9e84}\label{classcSystem_a05f411bbf675671c4285dfd855eb9e84}} 
+\index{c\+System@{c\+System}!c\+System@{c\+System}}
+\index{c\+System@{c\+System}!c\+System@{c\+System}}
+\subsubsection{\texorpdfstring{c\+System()}{cSystem()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily c\+System\+::c\+System (\begin{DoxyParamCaption}\item[{const std\+::string \&}]{path2calib }\end{DoxyParamCaption})}
+
+
+
+Constructor. 
+
+Construct a new \hyperlink{classcSystem}{c\+System} object from a configuration file. 
+\begin{DoxyParams}{Parameters}
+{\em path2calib} & Path to configuration files. \\
+\hline
+\end{DoxyParams}
+
+
+\subsection{Member Function Documentation}
+\mbox{\Hypertarget{classcSystem_ad08b05bd8f360a671094b7ab6a1b08db}\label{classcSystem_ad08b05bd8f360a671094b7ab6a1b08db}} 
+\index{c\+System@{c\+System}!cayley2hom@{cayley2hom}}
+\index{cayley2hom@{cayley2hom}!c\+System@{c\+System}}
+\subsubsection{\texorpdfstring{cayley2hom()}{cayley2hom()}}
+{\footnotesize\ttfamily template$<$typename T $>$ \\
+cv\+::\+Matx$<$T,4,4$>$ c\+System\+::cayley2hom (\begin{DoxyParamCaption}\item[{const cv\+::\+Matx$<$ T, 6, 1 $>$ \&}]{cayley\+Rep }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+6x1 minimal homogeneous transformation vector to homogeneous 4x4 transformation mattrix 
+\begin{DoxyParams}{Parameters}
+{\em c} & 6x1 Cayley parameters and translation \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+T 4x4 homogeneous transformation matrix 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classcSystem_aaa6ff4626fafe84a7c0e3d9d892500cf}\label{classcSystem_aaa6ff4626fafe84a7c0e3d9d892500cf}} 
+\index{c\+System@{c\+System}!cayley2rot@{cayley2rot}}
+\index{cayley2rot@{cayley2rot}!c\+System@{c\+System}}
+\subsubsection{\texorpdfstring{cayley2rot()}{cayley2rot()}}
+{\footnotesize\ttfamily template$<$typename T $>$ \\
+cv\+::\+Matx$<$T, 3, 3$>$ c\+System\+::cayley2rot (\begin{DoxyParamCaption}\item[{const cv\+::\+Matx$<$ T, 3, 1 $>$ \&}]{cay\+Param\+In }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+Cayley representation to 3x3 rotation matrix 
+\begin{DoxyParams}{Parameters}
+{\em cay\+Param\+In} & Cayley parameters. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+R rotation matrix. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classcSystem_ae1fa352a5d3ac3a9ce3d4dc1d0d3ee08}\label{classcSystem_ae1fa352a5d3ac3a9ce3d4dc1d0d3ee08}} 
+\index{c\+System@{c\+System}!get\+\_\+nr\+Cams@{get\+\_\+nr\+Cams}}
+\index{get\+\_\+nr\+Cams@{get\+\_\+nr\+Cams}!c\+System@{c\+System}}
+\subsubsection{\texorpdfstring{get\+\_\+nr\+Cams()}{get\_nrCams()}}
+{\footnotesize\ttfamily int c\+System\+::get\+\_\+nr\+Cams (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+Gets the number of cameras in the system \begin{DoxyReturn}{Returns}
+n\+Cams Number of cameras. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classcSystem_a2c5e497f4a8fd27d9a4a67f8de329b02}\label{classcSystem_a2c5e497f4a8fd27d9a4a67f8de329b02}} 
+\index{c\+System@{c\+System}!get\+K\+\_\+c@{get\+K\+\_\+c}}
+\index{get\+K\+\_\+c@{get\+K\+\_\+c}!c\+System@{c\+System}}
+\subsubsection{\texorpdfstring{get\+K\+\_\+c()}{getK\_c()}}
+{\footnotesize\ttfamily cv\+::\+Mat c\+System\+::get\+K\+\_\+c (\begin{DoxyParamCaption}\item[{int}]{cam }\end{DoxyParamCaption})}
+
+Gets the instrinsic calibration matrix from the camera c 
+\begin{DoxyParams}{Parameters}
+{\em cam} & The camera number identifier. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+K\+\_\+c A 3x3 Intrinsic calibration matrix. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classcSystem_ad98d9a5cca9c20536605a7e7800db04f}\label{classcSystem_ad98d9a5cca9c20536605a7e7800db04f}} 
+\index{c\+System@{c\+System}!get\+M\+\_\+c@{get\+M\+\_\+c}}
+\index{get\+M\+\_\+c@{get\+M\+\_\+c}!c\+System@{c\+System}}
+\subsubsection{\texorpdfstring{get\+M\+\_\+c()}{getM\_c()}}
+{\footnotesize\ttfamily cv\+::\+Matx44d c\+System\+::get\+M\+\_\+c (\begin{DoxyParamCaption}\item[{int}]{cam }\end{DoxyParamCaption})}
+
+Gets the extrinsic calibration matrix from the camera c. 
+\begin{DoxyParams}{Parameters}
+{\em cam} & The camera number identifier. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+M\+\_\+c A 4x4 Extrinsics calibration matrix. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classcSystem_adf0d3a26903fdcbf038e2d2f4334f60f}\label{classcSystem_adf0d3a26903fdcbf038e2d2f4334f60f}} 
+\index{c\+System@{c\+System}!Load\+M\+CS@{Load\+M\+CS}}
+\index{Load\+M\+CS@{Load\+M\+CS}!c\+System@{c\+System}}
+\subsubsection{\texorpdfstring{Load\+M\+C\+S()}{LoadMCS()}}
+{\footnotesize\ttfamily void c\+System\+::\+Load\+M\+CS (\begin{DoxyParamCaption}\item[{const std\+::string}]{path2calib }\end{DoxyParamCaption})}
+
+
+
+Loads the cameras calibration parameters from the configuration files. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em path2calib} & Path where the calibration parameters files are saved in the system. \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{classcSystem_a2cc39fd195d94873333c459da47d8244}\label{classcSystem_a2cc39fd195d94873333c459da47d8244}} 
+\index{c\+System@{c\+System}!set\+Pinhole\+Camera\+Matrix@{set\+Pinhole\+Camera\+Matrix}}
+\index{set\+Pinhole\+Camera\+Matrix@{set\+Pinhole\+Camera\+Matrix}!c\+System@{c\+System}}
+\subsubsection{\texorpdfstring{set\+Pinhole\+Camera\+Matrix()}{setPinholeCameraMatrix()}}
+{\footnotesize\ttfamily cv\+::\+Mat\+\_\+$<$double$>$ c\+System\+::set\+Pinhole\+Camera\+Matrix (\begin{DoxyParamCaption}\item[{const double}]{fx,  }\item[{const double}]{fy,  }\item[{const double}]{px,  }\item[{const double}]{py }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+Create a intrinsic camera matrix K for the given parameters 
+\begin{DoxyParams}{Parameters}
+{\em fx} & Focal length in x. \\
+\hline
+{\em fy} & Focal length in y. \\
+\hline
+{\em px} & Principal point coordinate in x. \\
+\hline
+{\em py} & Principal point coordinate in y. \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{classcSystem_a77c7c0e0aef5a2ca046e3f562c847f72}\label{classcSystem_a77c7c0e0aef5a2ca046e3f562c847f72}} 
+\index{c\+System@{c\+System}!set\+System\+Config@{set\+System\+Config}}
+\index{set\+System\+Config@{set\+System\+Config}!c\+System@{c\+System}}
+\subsubsection{\texorpdfstring{set\+System\+Config()}{setSystemConfig()}}
+{\footnotesize\ttfamily void c\+System\+::set\+System\+Config (\begin{DoxyParamCaption}\item[{int}]{num\+Cams,  }\item[{std\+::vector$<$ cv\+::\+Matx61d $>$}]{cayley\+\_\+calibration\+\_\+params,  }\item[{std\+::vector$<$ cv\+::\+Matx41d $>$}]{intrinsic\+\_\+params }\end{DoxyParamCaption})}
+
+
+
+Set the camera system configuration. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em num\+Cams} & Number of cameras that compose the system. \\
+\hline
+{\em cayley\+\_\+calibration\+\_\+params} & Vector of matrices containing the 6 cayley parameters for each camera. \\
+\hline
+{\em intrinsic\+\_\+params} & Vector of matrices containing the instrinsic parameters for each camera. \\
+\hline
+\end{DoxyParams}
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+include/c\+System.\+h\item 
+src/c\+System.\+cpp\end{DoxyCompactItemize}

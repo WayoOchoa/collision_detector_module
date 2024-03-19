@@ -1,0 +1,66 @@
+\hypertarget{classMultiFrame}{}\section{Multi\+Frame Class Reference}
+\label{classMultiFrame}\index{Multi\+Frame@{Multi\+Frame}}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classMultiFrame_a08ec547ed70cf94539b3a52c2b51363b}{Multi\+Frame} ()
+\begin{DoxyCompactList}\small\item\em Default constructor. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{classMultiFrame_a316ec9cec4e1564313cb1dd739701bc0}\label{classMultiFrame_a316ec9cec4e1564313cb1dd739701bc0}} 
+\hyperlink{classMultiFrame_a316ec9cec4e1564313cb1dd739701bc0}{$\sim$\+Multi\+Frame} ()
+\begin{DoxyCompactList}\small\item\em Default destructor of a \hyperlink{classMultiFrame}{Multi\+Frame} object. \end{DoxyCompactList}\item 
+\hyperlink{classMultiFrame_a381ae26db28aaf27bf0966e274a36e2a}{Multi\+Frame} (const std\+::vector$<$ cv\+::\+Mat $>$ \&images, const cv\+::\+Mat \&cam\+\_\+pose, const double \&timestamp)
+\begin{DoxyCompactList}\small\item\em Constructor. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classMultiFrame_a582643f882bf528e1e79019fadd10c58}\label{classMultiFrame_a582643f882bf528e1e79019fadd10c58}} 
+std\+::vector$<$ cv\+::\+Mat $>$ \hyperlink{classMultiFrame_a582643f882bf528e1e79019fadd10c58}{images\+\_\+}
+\begin{DoxyCompactList}\small\item\em Class data members. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{classMultiFrame_a50c22f3238a428ca1ee55174ffb59d9a}\label{classMultiFrame_a50c22f3238a428ca1ee55174ffb59d9a}} 
+double {\bfseries timestamp\+\_\+}
+\item 
+\mbox{\Hypertarget{classMultiFrame_a4f8bd6e70241fe7f8b62e4e392cac480}\label{classMultiFrame_a4f8bd6e70241fe7f8b62e4e392cac480}} 
+cv\+::\+Mat {\bfseries world\+\_\+\+Tcamera\+\_\+base\+\_\+}
+\item 
+\mbox{\Hypertarget{classMultiFrame_ae44bc3209f66f83c563fd6f9da44f6ef}\label{classMultiFrame_ae44bc3209f66f83c563fd6f9da44f6ef}} 
+bool {\bfseries b\+\_\+empty}
+\end{DoxyCompactItemize}
+
+
+\subsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{classMultiFrame_a08ec547ed70cf94539b3a52c2b51363b}\label{classMultiFrame_a08ec547ed70cf94539b3a52c2b51363b}} 
+\index{Multi\+Frame@{Multi\+Frame}!Multi\+Frame@{Multi\+Frame}}
+\index{Multi\+Frame@{Multi\+Frame}!Multi\+Frame@{Multi\+Frame}}
+\subsubsection{\texorpdfstring{Multi\+Frame()}{MultiFrame()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily Multi\+Frame\+::\+Multi\+Frame (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Default constructor. 
+
+Create a new \hyperlink{classMultiFrame}{Multi\+Frame} object. \begin{DoxySeeAlso}{See also}
+Multiframe(const std\+::vector$<$cv\+::\+Mat$>$\& images, const double \&timestamp) 
+\end{DoxySeeAlso}
+\mbox{\Hypertarget{classMultiFrame_a381ae26db28aaf27bf0966e274a36e2a}\label{classMultiFrame_a381ae26db28aaf27bf0966e274a36e2a}} 
+\index{Multi\+Frame@{Multi\+Frame}!Multi\+Frame@{Multi\+Frame}}
+\index{Multi\+Frame@{Multi\+Frame}!Multi\+Frame@{Multi\+Frame}}
+\subsubsection{\texorpdfstring{Multi\+Frame()}{MultiFrame()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily Multi\+Frame\+::\+Multi\+Frame (\begin{DoxyParamCaption}\item[{const std\+::vector$<$ cv\+::\+Mat $>$ \&}]{images,  }\item[{const cv\+::\+Mat \&}]{cam\+\_\+pose,  }\item[{const double \&}]{timestamp }\end{DoxyParamCaption})}
+
+
+
+Constructor. 
+
+Create a new \hyperlink{classMultiFrame}{Multi\+Frame} object from camera images. 
+\begin{DoxyParams}{Parameters}
+{\em images} & Read images from the multi-\/camera system. \\
+\hline
+{\em timestamp} & Associated timestamp at which the reading was done. \\
+\hline
+\end{DoxyParams}
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+include/Multi\+Frame.\+h\item 
+src/Multi\+Frame.\+cpp\end{DoxyCompactItemize}

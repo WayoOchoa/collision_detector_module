@@ -39,6 +39,10 @@
 
 using namespace std;
 
+/**
+ * @brief Namespace containing functions to perform the risk assessment process
+ * 
+ */
 namespace coldetector
 {
     class CollisionDetector{
@@ -174,15 +178,18 @@ namespace coldetector
             double DistancePointToLine(const cv::Point2f point, const cv::Vec3f epiline);
             /**
              * @brief Triangulate 3D points from a set of corresponding 2D matches.
-             * @param base_Tcam Extrinsic camera parametes.
-             * @param cam_K The instrinsic parameters of the camera.
-             * @param current_T_previous The relative transformation of image 2 w.r.t image 1.
-             * @param keypoints_previous_i Features detected on image 1.
-             * @param keypoints_current_i Features detected on image 2.
-             * @param filtered_matches Feature matches between image 1 and image 2.
-             * @param world_Tcurrent_base Transformation of the camera i w.r.t the world.
-             * @param b_to_world Flag to indicate if the final point cloud should be referenced to the world.
-             * @param triangulated_3dpoints Output array with the correspondent 3D point
+             * @param[in] base_Tcam Extrinsic camera parametes.
+             * @param[in] cam_K The instrinsic parameters of the camera.
+             * @param[in] current_T_previous The relative transformation of image 2 w.r.t image 1.
+             * @param[in] keypoints_previous_i Features detected on image 1.
+             * @param[in] keypoints_current_i Features detected on image 2.
+             * @param[in] descriptors_previous_i Descriptors computed on the previous frame.
+             * @param[in] descriptors_current_i Descriptors computed on the current frame.
+             * @param[in] filtered_matches Feature matches between image 1 and image 2.
+             * @param[in] world_Tcurrent_base Transformation of the camera i w.r.t the world.
+             * @param[in] b_to_world Flag to indicate if the final point cloud should be referenced to the world.
+             * @param[out] triangulated_3dpoints Output array with the correspondent 3D point
+             * @param[out] final_descriptors Output matrix of the correspondent descriptors from the 3D points that were computed.
             */
             void TriangulatePoints(const cv::Mat &base_Tcam, const cv::Mat cam_K, const cv::Mat & current_T_previous, const std::vector <cv::KeyPoint> &keypoints_previous_i, 
                                 const std::vector <cv::KeyPoint> &keypoints_current_i, const cv::Mat &descriptors_previous_i, const cv::Mat &descriptors_current_i, 
@@ -211,7 +218,7 @@ namespace coldetector
             cv::Matx<double, 4, 4> data_current_pose;
 
             /**
-             * Stops the thread when requested from the main program
+             * @brief Stops the thread when requested from the main program
             */
             void StopRequest();
 
