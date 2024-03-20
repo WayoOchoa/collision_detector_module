@@ -33,5 +33,8 @@ The library was implemented in Ubuntu 18.04 and using ROS melodic. To build the 
 ## Installation
 TODO
 
+## Run
+TODO
+
 ## Documentation
 See the library documentation for further info [<documentation>](./html/index.html)
