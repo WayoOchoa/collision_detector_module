@@ -90,11 +90,11 @@ class CollisionNode{
         ros::Publisher pc_pub_;
 
         // Camera System Definition
-        cSystem cam_system_;
+        coldetector::cSystem cam_system_;
         // Camera origin position in the robot chassis
         cv::Mat robot_base_Tcamera_base_;
         // Variable that contains the images
-        MultiFrame current_frame_;
+        coldetector::MultiFrame current_frame_;
 
         // Camera matrices
         std::vector<cv::Matx61d> M_c_; // Extrinsics Cayley parameters
@@ -213,7 +213,7 @@ class CollisionNode{
             // Saving image data
             double timestamp = ros::Time::now().toSec();
             if(!b_frame_incomplete && !b_stop_request_){
-                MultiFrame frame(images,world_Tcamera_base,timestamp);
+                coldetector::MultiFrame frame(images,world_Tcamera_base,timestamp);
                 {
                     std::lock_guard<std::mutex> lock(mFrameData);
                     b_new_data_ = true;

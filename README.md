@@ -37,4 +37,4 @@ TODO
 TODO
 
 ## Documentation
-See the library documentation for further info [<documentation>](./html/index.html)
+See the library documentation for further info [<documentation>](https://wayoochoa.github.io/collision_detector_module/)

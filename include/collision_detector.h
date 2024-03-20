@@ -45,6 +45,9 @@ using namespace std;
  */
 namespace coldetector
 {
+    class cSystem;
+    class MultiFrame;
+    
     class CollisionDetector{
         private:
             vector<cv::Mat> girona1000_chassis_points_; 
