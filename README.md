@@ -34,7 +34,7 @@ The library was implemented in Ubuntu 18.04 and using ROS melodic. To build the 
 TODO
 
 ## Run
-TODO
+TO DO
 
 ## Documentation
 See the library documentation for further info [<documentation>](https://wayoochoa.github.io/collision_detector_module/)
