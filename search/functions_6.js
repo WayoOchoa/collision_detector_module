@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['multiframe_0',['MultiFrame',['../classMultiFrame.html#a08ec547ed70cf94539b3a52c2b51363b',1,'MultiFrame::MultiFrame()'],['../classMultiFrame.html#a381ae26db28aaf27bf0966e274a36e2a',1,'MultiFrame::MultiFrame(const std::vector&lt; cv::Mat &gt; &amp;images, const cv::Mat &amp;cam_pose, const double &amp;timestamp)']]]
+  ['multiframe_0',['MultiFrame',['../classcoldetector_1_1MultiFrame.html#a243dc04084c4886fd9084552e5c6c4b4',1,'coldetector::MultiFrame::MultiFrame()'],['../classcoldetector_1_1MultiFrame.html#ac63130a06afcc0073d520e6666b6f978',1,'coldetector::MultiFrame::MultiFrame(const std::vector&lt; cv::Mat &gt; &amp;images, const cv::Mat &amp;cam_pose, const double &amp;timestamp)']]]
 ];

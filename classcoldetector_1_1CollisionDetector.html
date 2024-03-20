@@ -89,7 +89,7 @@ Collaboration diagram for coldetector::CollisionDetector:</div>
 <div class="center"><img src="classcoldetector_1_1CollisionDetector__coll__graph.png" border="0" usemap="#acoldetector_1_1CollisionDetector_coll__map" alt="Collaboration graph"/></div>
 <map name="acoldetector_1_1CollisionDetector_coll__map" id="acoldetector_1_1CollisionDetector_coll__map">
 <area shape="rect" title=" " alt="" coords="5,94,195,120"/>
-<area shape="rect" href="classMultiFrame.html" title=" " alt="" coords="57,5,143,31"/>
+<area shape="rect" href="classcoldetector_1_1MultiFrame.html" title=" " alt="" coords="22,5,178,31"/>
 <area shape="poly" title=" " alt="" coords="103,47,103,94,97,94,97,47"/>
 </map>
 <center><span class="legend">[<a href="graph_legend.html">legend</a>]</span></center></div>
@@ -97,7 +97,7 @@ Collaboration diagram for coldetector::CollisionDetector:</div>
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:aa2169b92cec8e25c107622210b4c2872" id="r_aa2169b92cec8e25c107622210b4c2872"><td class="memItemLeft" align="right" valign="top"><a id="aa2169b92cec8e25c107622210b4c2872" name="aa2169b92cec8e25c107622210b4c2872"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>CollisionDetector</b> (<a class="el" href="classcSystem.html">cSystem</a> *cam_system, ros::Publisher *pc_pub)</td></tr>
+&#160;</td><td class="memItemRight" valign="bottom"><b>CollisionDetector</b> (<a class="el" href="classcoldetector_1_1cSystem.html">cSystem</a> *cam_system, ros::Publisher *pc_pub)</td></tr>
 <tr class="separator:aa2169b92cec8e25c107622210b4c2872"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af720f23bdcfe3536325fae4891d12ad8" id="r_af720f23bdcfe3536325fae4891d12ad8"><td class="memItemLeft" align="right" valign="top"><a id="af720f23bdcfe3536325fae4891d12ad8" name="af720f23bdcfe3536325fae4891d12ad8"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>assignChassisPoints</b> ()</td></tr>
@@ -109,10 +109,10 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>assignChassisPoints</
 <tr class="memitem:aa4b6c5b052532e545758f84a668b43b2" id="r_aa4b6c5b052532e545758f84a668b43b2"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa4b6c5b052532e545758f84a668b43b2">CheckDataAvailability</a> ()</td></tr>
 <tr class="memdesc:aa4b6c5b052532e545758f84a668b43b2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Checks if new image and pose data is available from the system and copies them for processing.  <br /></td></tr>
 <tr class="separator:aa4b6c5b052532e545758f84a668b43b2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a41e80df83d6f79de79798674bef21156" id="r_a41e80df83d6f79de79798674bef21156"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a41e80df83d6f79de79798674bef21156">transferData</a> (const <a class="el" href="classMultiFrame.html">MultiFrame</a> &amp;F, bool new_data)</td></tr>
+<tr class="memitem:a41e80df83d6f79de79798674bef21156" id="r_a41e80df83d6f79de79798674bef21156"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a41e80df83d6f79de79798674bef21156">transferData</a> (const <a class="el" href="classcoldetector_1_1MultiFrame.html">MultiFrame</a> &amp;F, bool new_data)</td></tr>
 <tr class="memdesc:a41e80df83d6f79de79798674bef21156"><td class="mdescLeft">&#160;</td><td class="mdescRight">Transfers data from the main program to the collision detection thread.  <br /></td></tr>
 <tr class="separator:a41e80df83d6f79de79798674bef21156"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3e5a171f0d396656745e84b8e7a80cd9" id="r_a3e5a171f0d396656745e84b8e7a80cd9"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3e5a171f0d396656745e84b8e7a80cd9">FramesUpdate</a> (<a class="el" href="classMultiFrame.html">MultiFrame</a> &amp;current_frame)</td></tr>
+<tr class="memitem:a3e5a171f0d396656745e84b8e7a80cd9" id="r_a3e5a171f0d396656745e84b8e7a80cd9"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3e5a171f0d396656745e84b8e7a80cd9">FramesUpdate</a> (<a class="el" href="classcoldetector_1_1MultiFrame.html">MultiFrame</a> &amp;current_frame)</td></tr>
 <tr class="memdesc:a3e5a171f0d396656745e84b8e7a80cd9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Updates the previous_frame data with the current_frame that was already processed.  <br /></td></tr>
 <tr class="separator:a3e5a171f0d396656745e84b8e7a80cd9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a01855b9eb3534d701df52f0f503fdc1e" id="r_a01855b9eb3534d701df52f0f503fdc1e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a01855b9eb3534d701df52f0f503fdc1e">GetRelativeTransformationBetweenFrames</a> (const cv::Mat &amp;base_T_cam, const cv::Mat &amp;world_Tprevious_base, const cv::Mat &amp;world_Tcurrent_base, cv::Mat &amp;cam_previous_T_cam_current)</td></tr>
@@ -168,7 +168,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>b_consider_chassis_b_
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>b_new_data_</b></td></tr>
 <tr class="separator:ab23340a36c5a6de7ad9f57acfc2f07de"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad71e38040d7e6f64ee79d095915321fe" id="r_ad71e38040d7e6f64ee79d095915321fe"><td class="memItemLeft" align="right" valign="top"><a id="ad71e38040d7e6f64ee79d095915321fe" name="ad71e38040d7e6f64ee79d095915321fe"></a>
-<a class="el" href="classMultiFrame.html">MultiFrame</a>&#160;</td><td class="memItemRight" valign="bottom"><b>data_current_frame_imgs</b></td></tr>
+<a class="el" href="classcoldetector_1_1MultiFrame.html">MultiFrame</a>&#160;</td><td class="memItemRight" valign="bottom"><b>data_current_frame_imgs</b></td></tr>
 <tr class="separator:ad71e38040d7e6f64ee79d095915321fe"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:acda0507fbb212fe54a1165bd2b388c6d" id="r_acda0507fbb212fe54a1165bd2b388c6d"><td class="memItemLeft" align="right" valign="top"><a id="acda0507fbb212fe54a1165bd2b388c6d" name="acda0507fbb212fe54a1165bd2b388c6d"></a>
 cv::Matx&lt; double, 4, 4 &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>data_current_pose</b></td></tr>
@@ -457,7 +457,7 @@ std::mutex&#160;</td><td class="memItemRight" valign="bottom"><b>mMutexStop</b><
         <tr>
           <td class="memname">void coldetector::CollisionDetector::FramesUpdate </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classMultiFrame.html">MultiFrame</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>current_frame</em></span></td><td>)</td>
+          <td class="paramtype"><a class="el" href="classcoldetector_1_1MultiFrame.html">MultiFrame</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>current_frame</em></span></td><td>)</td>
           <td></td>
         </tr>
       </table>
@@ -629,7 +629,7 @@ std::mutex&#160;</td><td class="memItemRight" valign="bottom"><b>mMutexStop</b><
         <tr>
           <td class="memname">void coldetector::CollisionDetector::transferData </td>
           <td>(</td>
-          <td class="paramtype">const <a class="el" href="classMultiFrame.html">MultiFrame</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>F</em>, </span></td>
+          <td class="paramtype">const <a class="el" href="classcoldetector_1_1MultiFrame.html">MultiFrame</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>F</em>, </span></td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -642,7 +642,7 @@ std::mutex&#160;</td><td class="memItemRight" valign="bottom"><b>mMutexStop</b><
 <p>Transfers data from the main program to the collision detection thread. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">F</td><td><a class="el" href="classMultiFrame.html">MultiFrame</a> object that contains an array of N images, corresponding to each camera. </td></tr>
+    <tr><td class="paramname">F</td><td><a class="el" href="classcoldetector_1_1MultiFrame.html">MultiFrame</a> object that contains an array of N images, corresponding to each camera. </td></tr>
     <tr><td class="paramname">new_data</td><td>Flag that indicates that new data has been received. </td></tr>
   </table>
   </dd>

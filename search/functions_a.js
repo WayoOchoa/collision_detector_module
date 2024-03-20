@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['_7ecsystem_0',['~cSystem',['../classcSystem.html#af2cdf72ac6ea96ce574cc6f7dfe06f8e',1,'cSystem']]],
-  ['_7emultiframe_1',['~MultiFrame',['../classMultiFrame.html#a316ec9cec4e1564313cb1dd739701bc0',1,'MultiFrame']]]
+  ['_7ecsystem_0',['~cSystem',['../classcoldetector_1_1cSystem.html#a6bb15a8a25c3e708825458b1eb4eb683',1,'coldetector::cSystem']]],
+  ['_7emultiframe_1',['~MultiFrame',['../classcoldetector_1_1MultiFrame.html#a7f3f4bfa471d412cbdbb4f92bcdf8dcf',1,'coldetector::MultiFrame']]]
 ];

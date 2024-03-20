@@ -1,5 +1,5 @@
 <map id="coldetector::CollisionDetector" name="coldetector::CollisionDetector">
 <area shape="rect" id="Node000001" title=" " alt="" coords="5,94,195,120"/>
-<area shape="rect" id="Node000002" href="$classMultiFrame.html" title=" " alt="" coords="57,5,143,31"/>
+<area shape="rect" id="Node000002" href="$classcoldetector_1_1MultiFrame.html" title=" " alt="" coords="22,5,178,31"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="103,47,103,94,97,94,97,47"/>
 </map>
