@@ -75,9 +75,9 @@ $(function() {
   <div class="headertitle"><div class="title">Collision Detection and Avoidance for AUV</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p>Library that implements functions for risk assessment of obstacles (in the form of a 3D point cloud) in underwater environments. In contains the necessary functions for feature detection, feature matching, 3D points triangulation, and risk assessment; based on our paper <a href="https://doi.org/10.3390/s22145354">Collision Detection and Avoidance for Underwater Vehicles Using Omnidirectional Vision</a>.</p>
+<div class="textblock"><p>Package that implements functions for risk assessment of obstacles (in the form of a 3D point cloud) in underwater environments. In contains the necessary functions for feature detection, feature matching, 3D points triangulation, and risk assessment; based on our paper <a href="https://doi.org/10.3390/s22145354">Collision Detection and Avoidance for Underwater Vehicles Using Omnidirectional Vision</a>.</p>
 <h1>Dependencies</h1>
-<p>The library was implemented in Ubuntu 18.04 and using ROS melodic. To build the project the following dependencies are also required:</p><ul>
+<p>The package was implemented in Ubuntu 18.04 and using ROS melodic. Also, the main data is taken from <a href="https://stonefish.readthedocs.io/en/latest/">Stonefish</a> simulator. To build the project the following dependencies are also required:</p><ul>
 <li><a href="https://wiki.ros.org/Installation/Ubuntu">ROS</a></li>
 <li>Glog library <div class="fragment"><div class="line">sudo apt install libgoogle-glog-dev</div>
 </div><!-- fragment --></li>
@@ -96,13 +96,26 @@ $(function() {
 <li>Follow this <a href="https://stackoverflow.com/questions/63345411/ros-question-how-to-compile-custom-cv-bridge-with-opencv4-correctly">link</a> for further issues.</li>
 </ul>
 </li>
+<li>Stonefish simulator (<a href="https://stonefish.readthedocs.io/en/latest/install.html">Installation</a>).</li>
+<li>Cola2 dependencies (<b>TODO</b>)</li>
 </ul>
 <h1>Installation</h1>
-<p>TODO</p>
-<h1>Run</h1>
-<p>TO DO</p>
+<ul>
+<li>Enter your catkin workspace src and clone the repository: <div class="fragment"><div class="line">cd {your_workspace}/src</div>
+<div class="line">git clone https://github.com/WayoOchoa/collision_detector_module.git</div>
+</div><!-- fragment --></li>
+<li>Build the project using catkin build or catkin_make <div class="fragment"><div class="line">catkin build collision_detector_module</div>
+</div><!-- fragment --></li>
+</ul>
+<h1>Testing the code</h1>
+<h2>Configuration files</h2>
+<p>A set of parameters should be modified to test the code according to your application. First, we have a <b>params.conf</b> file in the configuration folder, to specify parameters such as what type of descriptor to use (i.e. SIFT, SURF, ORB (TBI)), number of features to extract, matching technique, etc. Fig. 1 shows a snapshot of the parameters inside this file.</p>
+<p><img src="./imgs/conf-file.png" alt="Fig 1. params.conf file snapshot." class="inline"/></p>
+<p>Finally, the user also needs to specify the camera parameters, which are crucial parameters for the 3D reconstruction to work. Camera rig parameters such as the number of cameras to be used, the extrinsics camera parameters, and intrinsic camera parameters MUST be provided for each camera.</p>
+<p><img src="./imgs/cam-settings.png" alt="Fig 2. Camera rig parameters specification." class="inline"/></p>
+<h2>Run</h2>
 <h1>Documentation</h1>
-<p>See the library <a href="https://wayoochoa.github.io/collision_detector_module/">documentation</a> for further info. </p>
+<p>See the package <a href="https://wayoochoa.github.io/collision_detector_module/">documentation</a> for further info. </p>
 </div></div><!-- contents -->
 </div><!-- PageDoc -->
 <!-- start footer part -->
