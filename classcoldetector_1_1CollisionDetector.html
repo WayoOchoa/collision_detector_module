@@ -96,9 +96,9 @@ Collaboration diagram for coldetector::CollisionDetector:</div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:aa2169b92cec8e25c107622210b4c2872" id="r_aa2169b92cec8e25c107622210b4c2872"><td class="memItemLeft" align="right" valign="top"><a id="aa2169b92cec8e25c107622210b4c2872" name="aa2169b92cec8e25c107622210b4c2872"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>CollisionDetector</b> (<a class="el" href="classcoldetector_1_1cSystem.html">cSystem</a> *cam_system, ros::Publisher *pc_pub)</td></tr>
-<tr class="separator:aa2169b92cec8e25c107622210b4c2872"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acf4c173627e5fc0ca467aac2c7c4cbf9" id="r_acf4c173627e5fc0ca467aac2c7c4cbf9"><td class="memItemLeft" align="right" valign="top"><a id="acf4c173627e5fc0ca467aac2c7c4cbf9" name="acf4c173627e5fc0ca467aac2c7c4cbf9"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>CollisionDetector</b> (<a class="el" href="classcoldetector_1_1cSystem.html">cSystem</a> *cam_system, ros::Publisher *pc_pub, ros::Publisher *pc_test)</td></tr>
+<tr class="separator:acf4c173627e5fc0ca467aac2c7c4cbf9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af720f23bdcfe3536325fae4891d12ad8" id="r_af720f23bdcfe3536325fae4891d12ad8"><td class="memItemLeft" align="right" valign="top"><a id="af720f23bdcfe3536325fae4891d12ad8" name="af720f23bdcfe3536325fae4891d12ad8"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>assignChassisPoints</b> ()</td></tr>
 <tr class="memdesc:af720f23bdcfe3536325fae4891d12ad8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function that initialize a set of 3D points for the AUV chassis. These points are used later for assesing the risk. <br /></td></tr>
@@ -136,9 +136,9 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>assignChassisPoints</
 <tr class="memitem:a27a359ba9c0c7b6966211ab35326179a" id="r_a27a359ba9c0c7b6966211ab35326179a"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a27a359ba9c0c7b6966211ab35326179a">DistancePointToLine</a> (const cv::Point2f point, const cv::Vec3f epiline)</td></tr>
 <tr class="memdesc:a27a359ba9c0c7b6966211ab35326179a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Computes the orthogonal distances from a 2D point to a line.  <br /></td></tr>
 <tr class="separator:a27a359ba9c0c7b6966211ab35326179a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9b07097107a9acbf91bb5e338998d2c6" id="r_a9b07097107a9acbf91bb5e338998d2c6"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a9b07097107a9acbf91bb5e338998d2c6">TriangulatePoints</a> (const cv::Mat &amp;base_Tcam, const cv::Mat cam_K, const cv::Mat &amp;current_T_previous, const std::vector&lt; cv::KeyPoint &gt; &amp;keypoints_previous_i, const std::vector&lt; cv::KeyPoint &gt; &amp;keypoints_current_i, const cv::Mat &amp;descriptors_previous_i, const cv::Mat &amp;descriptors_current_i, const std::vector&lt; cv::DMatch &gt; &amp;filtered_matches, const cv::Mat &amp;world_Tcurrent_base, bool b_to_world, std::vector&lt; cv::Mat &gt; &amp;final_3d_pts, cv::Mat &amp;final_descriptors)</td></tr>
-<tr class="memdesc:a9b07097107a9acbf91bb5e338998d2c6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Triangulate 3D points from a set of corresponding 2D matches.  <br /></td></tr>
-<tr class="separator:a9b07097107a9acbf91bb5e338998d2c6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a947c6ea7d547a695985b2fe02df10c00" id="r_a947c6ea7d547a695985b2fe02df10c00"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a947c6ea7d547a695985b2fe02df10c00">TriangulatePoints</a> (const cv::Mat &amp;base_Tcam, const cv::Mat cam_K, const cv::Mat &amp;current_T_previous, const std::vector&lt; cv::KeyPoint &gt; &amp;keypoints_previous_i, const std::vector&lt; cv::KeyPoint &gt; &amp;keypoints_current_i, const cv::Mat &amp;descriptors_previous_i, const cv::Mat &amp;descriptors_current_i, const std::vector&lt; cv::DMatch &gt; &amp;filtered_matches, const cv::Mat &amp;world_Tcurrent_base, bool b_to_world, std::vector&lt; cv::Mat &gt; &amp;final_3d_pts, std::vector&lt; double &gt; &amp;points_keypoints, cv::Mat &amp;final_descriptors)</td></tr>
+<tr class="memdesc:a947c6ea7d547a695985b2fe02df10c00"><td class="mdescLeft">&#160;</td><td class="mdescRight">Triangulate 3D points from a set of corresponding 2D matches.  <br /></td></tr>
+<tr class="separator:a947c6ea7d547a695985b2fe02df10c00"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a432e4c735be67180cc599c2353e00beb" id="r_a432e4c735be67180cc599c2353e00beb"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a432e4c735be67180cc599c2353e00beb">ComputeProjectionMatrices</a> (const cv::Mat cam_K, const cv::Mat &amp;current_T_previous, cv::Mat &amp;P_previous, cv::Mat &amp;P_current)</td></tr>
 <tr class="memdesc:a432e4c735be67180cc599c2353e00beb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Computes the Projection matrices of two frames.  <br /></td></tr>
 <tr class="separator:a432e4c735be67180cc599c2353e00beb"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -650,8 +650,8 @@ std::mutex&#160;</td><td class="memItemRight" valign="bottom"><b>mMutexStop</b><
 
 </div>
 </div>
-<a id="a9b07097107a9acbf91bb5e338998d2c6" name="a9b07097107a9acbf91bb5e338998d2c6"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a9b07097107a9acbf91bb5e338998d2c6">&#9670;&#160;</a></span>TriangulatePoints()</h2>
+<a id="a947c6ea7d547a695985b2fe02df10c00" name="a947c6ea7d547a695985b2fe02df10c00"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a947c6ea7d547a695985b2fe02df10c00">&#9670;&#160;</a></span>TriangulatePoints()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -710,6 +710,11 @@ std::mutex&#160;</td><td class="memItemRight" valign="bottom"><b>mMutexStop</b><
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">std::vector&lt; cv::Mat &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>final_3d_pts</em>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::vector&lt; double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>points_keypoints</em>, </span></td>
         </tr>
         <tr>
           <td class="paramkey"></td>
