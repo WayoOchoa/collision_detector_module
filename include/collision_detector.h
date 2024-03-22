@@ -68,6 +68,7 @@ namespace coldetector
             cSystem* cam_system_;
             // Main thread publishers
             ros::Publisher *pc_pub_;
+            ros::Publisher *pc_test_;
 
             /**
              * Flag that indicates if a stop has been requested
@@ -81,7 +82,7 @@ namespace coldetector
         
         public:
             // Constructor
-            CollisionDetector(cSystem *cam_system,ros::Publisher *pc_pub);
+            CollisionDetector(cSystem *cam_system,ros::Publisher *pc_pub, ros::Publisher *pc_test);
             ~CollisionDetector(){};
 
             //Parameters
@@ -197,7 +198,7 @@ namespace coldetector
             void TriangulatePoints(const cv::Mat &base_Tcam, const cv::Mat cam_K, const cv::Mat & current_T_previous, const std::vector <cv::KeyPoint> &keypoints_previous_i, 
                                 const std::vector <cv::KeyPoint> &keypoints_current_i, const cv::Mat &descriptors_previous_i, const cv::Mat &descriptors_current_i, 
                                 const std::vector<cv::DMatch>& filtered_matches, const cv::Mat &world_Tcurrent_base, 
-                                bool b_to_world, std::vector<cv::Mat> &final_3d_pts, cv::Mat &final_descriptors);
+                                bool b_to_world, std::vector<cv::Mat> &final_3d_pts, std::vector<double> &points_keypoints, cv::Mat &final_descriptors);
             /**
              * @brief Computes the Projection matrices of two frames.
              * @param cam_K The instrinsic parameters of the camera.

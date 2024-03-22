@@ -29,9 +29,10 @@ DECLARE_double(sigma);
 
 namespace coldetector
 {
-   CollisionDetector::CollisionDetector(cSystem *cam_system, ros::Publisher* pc_pub):
+   CollisionDetector::CollisionDetector(cSystem *cam_system, ros::Publisher* pc_pub, ros::Publisher *pc_test):
    b_new_data_(false), b_do_clahe_(FLAGS_clahe_processing), b_matching_all_all_(FLAGS_matching_all_vs_all), bFinishRequested_(false),
-   b_pointcloud_in_world_(FLAGS_point_cloud_in_world), b_consider_chassis_b_(FLAGS_consider_chassis), cam_system_(cam_system), pc_pub_(pc_pub)
+   b_pointcloud_in_world_(FLAGS_point_cloud_in_world), b_consider_chassis_b_(FLAGS_consider_chassis), cam_system_(cam_system), pc_pub_(pc_pub),
+   pc_test_(pc_test)
    {
       // Robot chasis, critical points initialization
       if(b_consider_chassis_b_) assignChassisPoints();
@@ -57,7 +58,8 @@ namespace coldetector
             // Checking that we have already received two frames from the system
             if(!previous_imgs_frame_.b_empty){
                std::vector<cv::Mat> final_3d_points; // Stores the triangulated points
-               cv::Mat points_descriptors; // The descriptor corresponding to each traingulated 3D point
+               cv::Mat points_descriptors; // The descriptor corresponding to each triangulated 3D point
+               std::vector<double> points_keypoints; // The 2D locations of each corresponding 3D point
                std::vector<int> cam_num_features; // How many features where considered for camera i
 
                /// Get camera base poses w.r.t. the world
@@ -118,7 +120,7 @@ namespace coldetector
                   if(filtered_matches.size() > 0){
                      TriangulatePoints(base_Tcam, cam_system_->getK_c(cam_id), cam_current_Tcam_previous, keypoints_previous_i, 
                                        keypoints_current_i, descriptors_previous_i, descriptors_current_i,
-                                       filtered_matches, world_Tcurrent_base, false, final_3d_points, points_descriptors);
+                                       filtered_matches, world_Tcurrent_base, false, final_3d_points, points_keypoints, points_descriptors);
                      cam_num_features.push_back(final_3d_points.size());
 
                   }
@@ -151,8 +153,17 @@ namespace coldetector
                 
                msg.descriptors.assign(points_descriptors.begin<float>(),points_descriptors.end<float>());
 
+               // Passing keypoints extracted
+               msg.keypoints = points_keypoints;
+
+               // Converting current pose
+               for(int i = 0; i < world_Tcurrent_base.total(); i++){
+                  msg.cam_world_pose[i] = *(world_Tcurrent_base.begin<double>()+i);
+               }
+
                // Publishing data
                pc_pub_->publish(msg);
+               pc_test_->publish(pcl2_msg);
             }
             FramesUpdate(current_imgs_frame_);  
          }
@@ -270,7 +281,7 @@ namespace coldetector
 
    void CollisionDetector::TriangulatePoints(const cv::Mat &base_Tcam, const cv::Mat cam_K, const cv::Mat & current_T_previous, const std::vector <cv::KeyPoint> &keypoints_previous_i, const std::vector <cv::KeyPoint> &keypoints_current_i, 
                            const cv::Mat &descriptors_previous_i, const cv::Mat &descriptors_current_i, const std::vector<cv::DMatch>& filtered_matches, const cv::Mat &world_Tcurrent_base, bool b_to_world, 
-                           std::vector<cv::Mat> &final_3d_pts, cv::Mat &final_descriptors){
+                           std::vector<cv::Mat> &final_3d_pts, std::vector<double> &points_keypoints, cv::Mat &final_descriptors){
       // find the projective matrices of both frames
       cv::Mat P_previous, P_current;
       ComputeProjectionMatrices(cam_K,current_T_previous,P_previous,P_current);
@@ -320,6 +331,7 @@ namespace coldetector
          final_3d_pts.push_back(pt_cam_current);
 
          // Adding the descriptor of the point
+         points_keypoints.insert(points_keypoints.end(), {cv::saturate_cast<double>(feat_img_1.x),cv::saturate_cast<double>(feat_img_1.y)});
          final_descriptors.push_back(descriptors_current_i.row(filtered_matches[pt_i].trainIdx));
       }
    }

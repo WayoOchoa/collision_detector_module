@@ -83,6 +83,7 @@
         "syncstream": "cpp",
         "*.ipp": "cpp",
         "span": "cpp",
-        "regex": "cpp"
+        "regex": "cpp",
+        "forward_list": "cpp"
     }
 }
