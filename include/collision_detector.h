@@ -9,6 +9,8 @@
 #include <mutex>
 #include <sys/stat.h>
 
+#include <Eigen/Core>
+
 //OpenCV includes
 #include <opencv2/core.hpp>
 #include <opencv2/opencv.hpp>
@@ -18,6 +20,7 @@
 #include <opencv2/xfeatures2d.hpp>
 #include <opencv2/viz.hpp>
 #include <opencv2/calib3d.hpp>
+#include <opencv2/core/eigen.hpp>
 
 //PCL library
 #include <pcl_ros/point_cloud.h>

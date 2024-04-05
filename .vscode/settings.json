@@ -84,6 +84,8 @@
         "*.ipp": "cpp",
         "span": "cpp",
         "regex": "cpp",
-        "forward_list": "cpp"
+        "forward_list": "cpp",
+        "core": "cpp",
+        "specialfunctions": "cpp"
     }
 }

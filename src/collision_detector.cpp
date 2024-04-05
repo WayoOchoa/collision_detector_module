@@ -120,7 +120,7 @@ namespace coldetector
                   if(filtered_matches.size() > 0){
                      TriangulatePoints(base_Tcam, cam_system_->getK_c(cam_id), cam_current_Tcam_previous, keypoints_previous_i, 
                                        keypoints_current_i, descriptors_previous_i, descriptors_current_i,
-                                       filtered_matches, world_Tcurrent_base, false, final_3d_points, points_keypoints, points_descriptors);
+                                       filtered_matches, world_Tcurrent_base, true, final_3d_points, points_keypoints, points_descriptors);
                      cam_num_features.push_back(final_3d_points.size());
 
                   }
@@ -142,7 +142,7 @@ namespace coldetector
                   point.z = final_3d_points[p].at<double>(2,0);
                   pcl_msg.points.push_back(point);
                }
-               pcl_msg.header.frame_id = "mcs_tf";
+               pcl_msg.header.frame_id = "world_ned";
                sensor_msgs::convertPointCloudToPointCloud2(pcl_msg,pcl2_msg);
                msg.points3d = pcl2_msg;
 

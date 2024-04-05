@@ -46,6 +46,7 @@ find_package(Boost REQUIRED)
 ## Flags and Google library
 find_package(glog REQUIRED)
 find_package(gflags REQUIRED)
+find_package(Eigen3 REQUIRED)
 
 ## Boost library
 find_package(Boost REQUIRED COMPONENTS thread system)
