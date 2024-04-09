@@ -75,7 +75,7 @@ namespace coldetector
                   cv::Mat cam_previous_Tcam_current(4,4,CV_64F);
                   GetRelativeTransformationBetweenFrames(base_Tcam, world_Tprevious_base, world_Tcurrent_base,
                                                          cam_previous_Tcam_current);
-                  cv::Mat cam_current_Tcam_previous = cam_previous_Tcam_current.inv(); // TODO: Check that it is a copy and not a reference
+                  cv::Mat cam_current_Tcam_previous = cam_previous_Tcam_current.inv();
 
                   // 2. Image pre-processing: The image is processed to enhance the contrast and revognize
                   // more features in the image
@@ -127,43 +127,43 @@ namespace coldetector
                }
 
                // Convert Mat of Points into PointCloud variable
-               if(final_3d_points.size() < 200) continue; // Not enough points were triangulated
+               if(final_3d_points.size() > 200){ // Not enough points were triangulated
+                  // Prepare data for publishing it into ROS
+                  // Point Cloud conversion
+                  collision_detection_module::DescribedPointCloud msg;
+                  sensor_msgs::PointCloud2 pcl2_msg;
+                  sensor_msgs::PointCloud pcl_msg;
+                  
+                  for(int p = 0; p < final_3d_points.size(); p++){
+                     geometry_msgs::Point32 point;
+                     point.x = final_3d_points[p].at<double>(0,0);
+                     point.y = final_3d_points[p].at<double>(1,0);
+                     point.z = final_3d_points[p].at<double>(2,0);
+                     pcl_msg.points.push_back(point);
+                  }
+                  pcl_msg.header.frame_id = "world_ned";
+                  sensor_msgs::convertPointCloudToPointCloud2(pcl_msg,pcl2_msg);
+                  msg.points3d = pcl2_msg;
 
-               // Prepare data for publishing it into ROS
-               // Point Cloud conversion
-               collision_detection_module::DescribedPointCloud msg;
-               sensor_msgs::PointCloud2 pcl2_msg;
-               sensor_msgs::PointCloud pcl_msg;
-               
-               for(int p = 0; p < final_3d_points.size(); p++){
-                  geometry_msgs::Point32 point;
-                  point.x = final_3d_points[p].at<double>(0,0);
-                  point.y = final_3d_points[p].at<double>(1,0);
-                  point.z = final_3d_points[p].at<double>(2,0);
-                  pcl_msg.points.push_back(point);
+                  // Converting descriptors
+                  msg.num_descriptors = points_descriptors.rows;
+                  msg.descriptor_length = points_descriptors.cols;
+                  msg.cam_num_features = cam_num_features;
+                  
+                  msg.descriptors.assign(points_descriptors.begin<float>(),points_descriptors.end<float>());
+
+                  // Passing keypoints extracted
+                  msg.keypoints = points_keypoints;
+
+                  // Converting current pose
+                  for(int i = 0; i < world_Tcurrent_base.total(); i++){
+                     msg.cam_world_pose[i] = *(world_Tcurrent_base.begin<double>()+i);
+                  }
+
+                  // Publishing data
+                  pc_pub_->publish(msg);
+                  pc_test_->publish(pcl2_msg);
                }
-               pcl_msg.header.frame_id = "world_ned";
-               sensor_msgs::convertPointCloudToPointCloud2(pcl_msg,pcl2_msg);
-               msg.points3d = pcl2_msg;
-
-               // Converting descriptors
-               msg.num_descriptors = points_descriptors.rows;
-               msg.descriptor_length = points_descriptors.cols;
-               msg.cam_num_features = cam_num_features;
-                
-               msg.descriptors.assign(points_descriptors.begin<float>(),points_descriptors.end<float>());
-
-               // Passing keypoints extracted
-               msg.keypoints = points_keypoints;
-
-               // Converting current pose
-               for(int i = 0; i < world_Tcurrent_base.total(); i++){
-                  msg.cam_world_pose[i] = *(world_Tcurrent_base.begin<double>()+i);
-               }
-
-               // Publishing data
-               pc_pub_->publish(msg);
-               pc_test_->publish(pcl2_msg);
             }
             FramesUpdate(current_imgs_frame_);  
          }
@@ -185,7 +185,7 @@ namespace coldetector
    }
 
    void CollisionDetector::transferData(const MultiFrame &F, bool new_data){
-      {
+      {  
          std::lock_guard<std::mutex> lock(mReceiveData);
          b_new_data_ = new_data;
          data_current_frame_imgs = F;
@@ -283,32 +283,43 @@ namespace coldetector
                            const cv::Mat &descriptors_previous_i, const cv::Mat &descriptors_current_i, const std::vector<cv::DMatch>& filtered_matches, const cv::Mat &world_Tcurrent_base, bool b_to_world, 
                            std::vector<cv::Mat> &final_3d_pts, std::vector<double> &points_keypoints, cv::Mat &final_descriptors){
       // find the projective matrices of both frames
-      cv::Mat P_previous, P_current;
+      cv::Mat P_previous, P_current, P_pdebug, P_cdebug;
       ComputeProjectionMatrices(cam_K,current_T_previous,P_previous,P_current);
       // Adapting the projection matrices for later use with OpenCV
-      std::vector <cv::Mat> projection_matrices;
+      std::vector <cv::Mat> projection_matrices, p_mats_debug;
       std::vector <cv::Point2f> vec_filtered_matches_previous, vec_filtered_matches_current;
       projection_matrices.push_back(P_previous);
       projection_matrices.push_back(P_current);
       FromMatchesToVectorofPoints(keypoints_previous_i,keypoints_current_i,filtered_matches,vec_filtered_matches_previous,vec_filtered_matches_current);
       std::vector <cv::Mat> vec_filtered_points_2d;
+      std::vector <cv::Point2f> pt_prev, pt_curr;
+      pt_prev.push_back(cv::Point2f(100,50));
+      pt_curr.push_back(cv::Point2f(70,50));
       GetArrayOfPoints(vec_filtered_matches_previous, vec_filtered_matches_current, vec_filtered_points_2d);
 
       // Triangulation with OpenCV
       cv::Mat triangulated_points;
       cv::sfm::triangulatePoints(vec_filtered_points_2d,projection_matrices,triangulated_points);
 
+      // Projection matrix of previous w.r.t. current
+      cv::Mat current_P_previous;
+      cv::Mat rotation = current_T_previous(cv::Range(0, 3), cv::Range(0, 3) );
+      cv::Mat translation = (cv::Mat_<double>(3,1) << current_T_previous.at<double>(0,3),
+              current_T_previous.at<double>(1,3),
+              current_T_previous.at<double>(2,3));
+      cv::sfm::projectionFromKRt(cam_K,rotation,translation,current_P_previous);
+      
       /// Check 3D points
       for(int pt_i = 0; pt_i < triangulated_points.size().width; pt_i++){
          cv::Mat pt_hom;
-         cv::Mat pt_cam_previous, pt_cam_current, pt_cam_current_in_metric_units;
+         cv::Mat pt_cam_previous, pt_cam_current;
          sfm::euclideanToHomogeneous(triangulated_points.col(pt_i),pt_hom);
          sfm::euclideanToHomogeneous(projection_matrices[0]*pt_hom,pt_cam_previous);
          sfm::euclideanToHomogeneous(projection_matrices[1]*pt_hom,pt_cam_current);
-         // Filter points behind the camera (-z)
+         //// Filter points behind the camera (-z)
          if(pt_cam_previous.at<double>(2, 0) < 0.0 || pt_cam_current.at<double>(2, 0) < 0.0) continue;
 
-         // Filter points with the reprojection error
+         //// Filter points with the reprojection error
          cv::Point2f feat_img_1 = keypoints_previous_i[filtered_matches[pt_i].queryIdx].pt;
          cv::Point2f feat_img_2 = keypoints_current_i[filtered_matches[pt_i].trainIdx].pt;
 
@@ -325,7 +336,7 @@ namespace coldetector
          if(cv::sqrt(errXcurrent * errXcurrent + errYcurrent * errYcurrent) > 4.0) continue;
 
          // Convert the point in camera frame previous to the current cam frame.
-         pt_cam_current = base_Tcam * current_T_previous * pt_hom;
+         pt_cam_current = base_Tcam * pt_hom;
          // If the point is referrenced to the world
          if(b_to_world) pt_cam_current = world_Tcurrent_base * pt_cam_current;
          final_3d_pts.push_back(pt_cam_current);
