@@ -97,7 +97,7 @@ namespace coldetector
                   // Detect keypoints in both images and compute its descriptors
                   std::vector<cv::KeyPoint> keypoints_previous_i, keypoints_current_i;
                   cv::Mat descriptors_previous_i, descriptors_current_i;
-                  ComputeFeatures(previous_image_cam_i, current_image_cam_i, keypoints_previous_i,keypoints_current_i,descriptors_previous_i,
+                  ComputeFeatures(previous_image_cam_i, current_image_cam_i, cam_id, keypoints_previous_i,keypoints_current_i,descriptors_previous_i,
                                  descriptors_current_i);
                   // Match keypoints between the two frames
                   std::vector<cv::DMatch> best_matches;
@@ -110,7 +110,10 @@ namespace coldetector
                   if(FLAGS_matching_all_vs_all){
                      ComputeMatchesAllvsAll(descriptors_previous_i,descriptors_current_i,best_matches);
                      if(best_matches.size() > 0) {
+                        cout << "cam_id: " << cam_id << endl;
+                        cout << "bm size: " << best_matches.size() << endl;
                         FilterMatchesByEpipolarConstrain(keypoints_previous_i,keypoints_current_i,best_matches,current_Fprevious,filtered_matches);
+                        cout << "fm size: " << filtered_matches.size() << ". Percentage: " << (filtered_matches.size()*100)/best_matches.size() << endl;
                      }                
                   }else{
                      // TODO: Epipolar matching
@@ -165,6 +168,7 @@ namespace coldetector
                   pc_test_->publish(pcl2_msg);
                }
             }
+            cout << endl << endl;
             FramesUpdate(current_imgs_frame_);  
          }
          // Stops this thread if requested by the main program
@@ -201,19 +205,41 @@ namespace coldetector
       cam_previous_T_cam_current = world_Tprevious_cam.inv() * world_Tcurrent_cam;
    }
 
-   void CollisionDetector::ComputeFeatures(const cv::Mat &previous_image_cam_i, const cv::Mat &current_image_cam_i, std::vector <cv::KeyPoint> &keypoints_previous_i, 
+   void CollisionDetector::ComputeFeatures(const cv::Mat &previous_image_cam_i, const cv::Mat &current_image_cam_i,const int &cam_id, std::vector <cv::KeyPoint> &keypoints_previous_i, 
                            std::vector <cv::KeyPoint> &keypoints_current_i, cv::Mat &descriptors_previous_i, cv::Mat &descriptors_current_i){
       // Obtains the keypoints and descriptors of the previous_image_frame and current_image_frame
       if(FLAGS_detector_type == "SIFT"){
          cv::Ptr<SIFT> detector = SIFT::create(FLAGS_number_of_features,FLAGS_nOctaveLayers,FLAGS_contrastThreshold,
                                                       FLAGS_edgeThreshold, FLAGS_sigma);
-         detector->detectAndCompute(previous_image_cam_i,cv::Mat(), keypoints_previous_i, descriptors_previous_i);
+         // Compute keypoints and descriptors only if they haven't been computed in previous steps                                                    
+         if(previous_imgs_frame_.frame_keypoints_[cam_id].empty() || previous_imgs_frame_.frame_keypoints_[cam_id].size()<6){
+            detector->detectAndCompute(previous_image_cam_i,cv::Mat(), keypoints_previous_i, descriptors_previous_i);
+            previous_imgs_frame_.frame_keypoints_[cam_id] = keypoints_previous_i;
+            previous_imgs_frame_.frame_descriptors_[cam_id] = descriptors_previous_i;            
+         }else{
+            keypoints_previous_i = previous_imgs_frame_.frame_keypoints_[cam_id];
+            descriptors_previous_i = previous_imgs_frame_.frame_descriptors_[cam_id];
+         }
+         // Compute new frame keypoints
          detector->detectAndCompute(current_image_cam_i,cv::Mat(), keypoints_current_i, descriptors_current_i);
+         current_imgs_frame_.frame_keypoints_[cam_id] = keypoints_current_i;
+         current_imgs_frame_.frame_descriptors_[cam_id] = descriptors_current_i;
 
       }else if(FLAGS_detector_type == "SURF"){
          cv::Ptr<SURF> detector = SURF::create(FLAGS_min_Hessian,FLAGS_nOctaves,FLAGS_nOctaveLayers,false);
-         detector->detectAndCompute(previous_image_cam_i,cv::Mat(), keypoints_previous_i, descriptors_previous_i);
+         // Compute keypoints and descriptors only if they haven't been computed in previous steps
+         if(previous_imgs_frame_.frame_keypoints_[cam_id].empty() || previous_imgs_frame_.frame_keypoints_[cam_id].size()<6){
+            detector->detectAndCompute(previous_image_cam_i,cv::Mat(), keypoints_previous_i, descriptors_previous_i);
+            previous_imgs_frame_.frame_keypoints_[cam_id] = keypoints_previous_i;
+            previous_imgs_frame_.frame_descriptors_[cam_id] = descriptors_previous_i;
+         }else{
+            keypoints_previous_i = previous_imgs_frame_.frame_keypoints_[cam_id];
+            descriptors_previous_i = previous_imgs_frame_.frame_descriptors_[cam_id];
+         }
+         // Compute new frame keypoints
          detector->detectAndCompute(current_image_cam_i,cv::Mat(), keypoints_current_i, descriptors_current_i);
+         current_imgs_frame_.frame_keypoints_[cam_id] = keypoints_current_i;
+         current_imgs_frame_.frame_descriptors_[cam_id] = descriptors_current_i;
       }
    }
 

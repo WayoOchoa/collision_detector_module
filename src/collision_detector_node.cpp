@@ -215,7 +215,7 @@ class CollisionNode{
             // Saving image data
             double timestamp = ros::Time::now().toSec();
             if(!b_frame_incomplete && !b_stop_request_){
-                coldetector::MultiFrame frame(images,world_Tcamera_base,timestamp);
+                coldetector::MultiFrame frame(images,world_Tcamera_base,timestamp,cam_system_.get_nrCams());
                 {
                     std::lock_guard<std::mutex> lock(mFrameData);
                     b_new_data_ = true;

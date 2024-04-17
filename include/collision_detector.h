@@ -135,12 +135,13 @@ namespace coldetector
              * @brief Compute keypoints and its descriptors in two images.
              * @param previous_image_cam_i Image of camera i in the previous frame.
              * @param current_image_cam_i Image of camera i in the currnet frame.
+             * @param cam_id Current camera id that is used for feature detection.
              * @param keypoints_previous_i Output vector of cv::Keypoints corresponding to features detected on previous frame.
              * @param keypoints_current_i Output vector of cv::Keypoints corresponding to features detected on current frame.
              * @param descriptors_previous_i Output vector of corresponding descriptors on previous frame.
              * @param descriptors_current_i Output vector of corresponding descriptors on current frame.
             */
-            void ComputeFeatures(const cv::Mat &previous_image_cam_i, const cv::Mat &current_image_cam_i, std::vector <cv::KeyPoint> &keypoints_previous_i, 
+            void ComputeFeatures(const cv::Mat &previous_image_cam_i, const cv::Mat &current_image_cam_i, const int &cam_id, std::vector <cv::KeyPoint> &keypoints_previous_i, 
                                 std::vector <cv::KeyPoint> &keypoints_current_i, cv::Mat &descriptors_previous_i, cv::Mat &descriptors_current_i);
             /**
              * @brief Compute the Fundamental matrix between two frames given their relative transformation matrix
