@@ -10,6 +10,7 @@
 #include <sys/stat.h>
 
 #include <Eigen/Core>
+#include <eigen3/Eigen/Eigenvalues>
 
 //OpenCV includes
 #include <opencv2/core.hpp>
@@ -163,10 +164,11 @@ namespace coldetector
              * @param keypoints_current_i Features detected on current frame.
              * @param best_matches Set of feature matches between images.
              * @param F_matrix Fundamental matrix of the previous frame w.r.t. the current frame.
+             * @param img_size Size of the image.
              * @param filtered_matches Output vector with all the feature matches that satisfy the epipolar constraint.
             */
-            void FilterMatchesByEpipolarConstrain(const std::vector <cv::KeyPoint> &keypoints_previous_i, const std::vector <cv::KeyPoint> &keypoints_current_i, 
-                                                const std::vector<cv::DMatch> &best_matches, const cv::Mat &F_matrix, std::vector<cv::DMatch>& filtered_matches);
+            void FilterMatchesByEpipolarConstrain(const cv::Mat &img, const cv::Mat &img2, const std::vector <cv::KeyPoint> &keypoints_previous_i, const std::vector <cv::KeyPoint> &keypoints_current_i, 
+                                                const std::vector<cv::DMatch> &best_matches, const cv::Mat &F_matrix, const cv::Size2i &img_size, std::vector<cv::DMatch>& filtered_matches);
             /**
              * @brief Transforms a vector of DMatch type into a Point2d object
              * @param keypoints_frame1 Features detected on frame 1.

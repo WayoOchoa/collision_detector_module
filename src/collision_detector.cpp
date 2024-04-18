@@ -110,10 +110,12 @@ namespace coldetector
                   if(FLAGS_matching_all_vs_all){
                      ComputeMatchesAllvsAll(descriptors_previous_i,descriptors_current_i,best_matches);
                      if(best_matches.size() > 0) {
-                        cout << "cam_id: " << cam_id << endl;
-                        cout << "bm size: " << best_matches.size() << endl;
-                        FilterMatchesByEpipolarConstrain(keypoints_previous_i,keypoints_current_i,best_matches,current_Fprevious,filtered_matches);
-                        cout << "fm size: " << filtered_matches.size() << ". Percentage: " << (filtered_matches.size()*100)/best_matches.size() << endl;
+                        //cout << "cam_id: " << cam_id << endl;
+                        //cout << "bm size: " << best_matches.size() << endl;
+                        static cv::Size2i img_size = previous_image_cam_i.size();
+                        if(cam_id == 5)
+                        FilterMatchesByEpipolarConstrain(previous_image_cam_i,current_image_cam_i, keypoints_previous_i,keypoints_current_i,best_matches,current_Fprevious, img_size,filtered_matches);
+                        //cout << "fm size: " << filtered_matches.size() << ". Percentage: " << (filtered_matches.size()*100)/best_matches.size() << endl;
                      }                
                   }else{
                      // TODO: Epipolar matching
@@ -168,7 +170,7 @@ namespace coldetector
                   pc_test_->publish(pcl2_msg);
                }
             }
-            cout << endl << endl;
+            cout << "\n\n";
             FramesUpdate(current_imgs_frame_);  
          }
          // Stops this thread if requested by the main program
@@ -245,17 +247,17 @@ namespace coldetector
 
    // Computes the fundamental matrix between two frames given the transformation matrix
    void CollisionDetector::ComputeFundamentalMatrix(const cv::Mat & current_T_previous, const cv::Mat cam_K, cv::Mat &current_F_previous){
-       // https://sourishghosh.com/2016/fundamental-matrix-from-camera-matrices/
-       cv::Mat rotation = current_T_previous(cv::Range(0, 3), cv::Range(0, 3) );
-       cv::Mat translation = (cv::Mat_<double>(3,1) << current_T_previous.at<double>(0,3),
-               current_T_previous.at<double>(1,3),
-               current_T_previous.at<double>(2,3));
-       cv::Mat A = cam_K * rotation.t() * translation;
-       cv::Mat cross_product_mat = (cv::Mat_<double>(3,3) << 0, -A.at<double>(2,0), A.at<double>(1,0),
-               A.at<double>(2,0), 0, -A.at<double>(0,0),
-               -A.at<double>(1,0), A.at<double>(0,0), 0);
-       current_F_previous = (cam_K.inv()).t() * rotation * cam_K.t() * cross_product_mat;
-       current_F_previous = current_F_previous/current_F_previous.at<double>(2,2);
+      // https://sourishghosh.com/2016/fundamental-matrix-from-camera-matrices/
+      cv::Mat rotation = current_T_previous(cv::Range(0, 3), cv::Range(0, 3) );
+      cv::Mat translation = (cv::Mat_<double>(3,1) << current_T_previous.at<double>(0,3),
+              current_T_previous.at<double>(1,3),
+              current_T_previous.at<double>(2,3));
+      cv::Mat A = cam_K * rotation.t() * translation;
+      cv::Mat cross_product_mat = (cv::Mat_<double>(3,3) << 0, -A.at<double>(2,0), A.at<double>(1,0),
+              A.at<double>(2,0), 0, -A.at<double>(0,0),
+              -A.at<double>(1,0), A.at<double>(0,0), 0);
+      current_F_previous = (cam_K.inv()).t() * rotation * cam_K.t() * cross_product_mat;
+      current_F_previous = current_F_previous/current_F_previous.at<double>(2,2);
    }
 
    void CollisionDetector::ComputeMatchesAllvsAll(const cv::Mat &descriptors_previous_i, const cv::Mat &descriptors_current_i, std::vector<cv::DMatch>& best_matches){
@@ -276,8 +278,46 @@ namespace coldetector
       }
    }
 
-   void CollisionDetector::FilterMatchesByEpipolarConstrain(const std::vector <cv::KeyPoint> &keypoints_previous_i, const std::vector <cv::KeyPoint> &keypoints_current_i, 
-                           const std::vector<cv::DMatch> &best_matches, const cv::Mat &F_matrix, std::vector<cv::DMatch>& filtered_matches){
+   void CollisionDetector::FilterMatchesByEpipolarConstrain(const cv::Mat &img,const cv::Mat &img2,const std::vector <cv::KeyPoint> &keypoints_previous_i, const std::vector <cv::KeyPoint> &keypoints_current_i, 
+                           const std::vector<cv::DMatch> &best_matches, const cv::Mat &F_matrix, const cv::Size2i &img_size, std::vector<cv::DMatch>& filtered_matches){
+      // Check location of epipoles (if they are inside the image then it is a degenerate case of F_matrix)
+      static int img_width = img_size.width;
+      static int img_height = img_size.height;
+      Eigen::Matrix3f F;
+      cv::cv2eigen(F_matrix,F);
+      cout << "F\n" << F << endl;
+      Eigen::EigenSolver<Eigen::Matrix3f> eigen_matrix_right(F.transpose()*F),eigen_matrix_left(F*F.transpose());
+      // Finding the index of the minimum eigenvalue
+      float min_eigenvalue_right=1000;
+      float min_eigenvalue_left=1000;
+      int idx_eigenvalue_right, idx_eigenvalue_left;
+      for(int i = 0; i < eigen_matrix_right.eigenvalues().rows(); i++){
+         if(eigen_matrix_right.eigenvalues()[i].real() < min_eigenvalue_right){
+            min_eigenvalue_right = eigen_matrix_right.eigenvalues()[i].real();
+            idx_eigenvalue_right = i;
+         }
+         if(eigen_matrix_left.eigenvalues()[i].real() < min_eigenvalue_left){
+            min_eigenvalue_left = eigen_matrix_left.eigenvalues()[i].real();
+            idx_eigenvalue_left = i;
+         }
+      }
+      // Check that the epipole in the current frame is not inside the image
+      Eigen::Vector3cf epipole_right = eigen_matrix_right.eigenvectors().col(idx_eigenvalue_right)/eigen_matrix_right.eigenvectors().col(idx_eigenvalue_right)[2];
+      cout << "values\n" << eigen_matrix_right.eigenvalues() << endl;
+      cout << "vectors\n" << eigen_matrix_right.eigenvectors() << endl;
+      cout << "idx_r: " << idx_eigenvalue_right << " idx_left: " << idx_eigenvalue_left << endl;
+      // Check that the epipole in the previous frame is not inside the image
+      Eigen::Vector3cf epipole_left = eigen_matrix_left.eigenvectors().col(idx_eigenvalue_left)/eigen_matrix_left.eigenvectors().col(idx_eigenvalue_left)[2];
+      if((epipole_left[0].real() > 0 && epipole_left[0].real() <= img_width) && (epipole_left[1].real() > 0 && epipole_left[1].real() <= img_height) ||
+      (epipole_right[0].real() > 0 && epipole_right[0].real() <= img_width) && (epipole_right[1].real() > 0 && epipole_right[1].real() <= img_height)){
+         filtered_matches = best_matches;
+         cout << "A - epipole_r\n" << epipole_right << endl;
+         cout << "A - epipole_l\n" << epipole_left << endl;
+         return;
+      }
+      cout << "B - epipole_r\n" << epipole_right << endl;
+      cout << "B - epipole_l\n" << epipole_left << endl;
+
       // Compute epipolar lines on the current image frame
       std::vector<cv::Point2f> points_previous_i, points_current_i;
       FromMatchesToVectorofPoints(keypoints_previous_i, keypoints_current_i, best_matches, // Transforms the matches into the correspondent input that
@@ -289,6 +329,16 @@ namespace coldetector
          double epipole_dist = DistancePointToLine(points_current_i[l],lines_current_i[l]);
          if(epipole_dist < FLAGS_int_epipolar_dst_thr) filtered_matches.push_back(best_matches[l]);
       }
+
+      cv::Mat lines_img;
+      img2.copyTo(lines_img);
+      for (auto it = lines_current_i.begin(); it != (lines_current_i.begin()+30); ++it) {
+            cv::line(lines_img, cv::Point(0,-(*it)[2]/(*it)[1]),
+                     cv::Point(lines_img.cols, -((*it)[2]+(*it)[0]*lines_img.cols)/(*it)[1]),
+                     cv::Scalar(255,255,255));
+      }
+      cv::imshow("TEST",lines_img);
+      cv::waitKey(0);
    }
 
    // Transform a vector of DMatch into a one of Point2d
