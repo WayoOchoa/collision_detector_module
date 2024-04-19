@@ -120,12 +120,23 @@ namespace coldetector
                      // TODO: Epipolar matching
                   }
                   
+
                   // 4. Triangulation step
                   if(filtered_matches.size() > 0){
+                     std::vector<cv::KeyPoint> keyprev, keycurr;
+                     cv::Mat descprev, desccurr;
+                     std::vector<cv::DMatch> matches_foo;
                      TriangulatePoints(base_Tcam, cam_system_->getK_c(cam_id), cam_current_Tcam_previous, keypoints_previous_i, 
                                        keypoints_current_i, descriptors_previous_i, descriptors_current_i,
-                                       filtered_matches, world_Tcurrent_base, true, final_3d_points, points_keypoints, points_descriptors);
+                                       filtered_matches, world_Tcurrent_base, true, final_3d_points, points_keypoints, points_descriptors,
+                                       keyprev,keycurr,descprev,desccurr);
                      cam_num_features.push_back(final_3d_points.size());
+                     ComputeMatchesAllvsAll(descprev,desccurr,matches_foo);
+
+                     cv::Mat matches_img;
+                     cv::drawMatches(previous_image_cam_i,keyprev,current_image_cam_i,keycurr,matches_foo,matches_img);
+                     cv::imshow("TEST",matches_img);
+                     cv::waitKey(0);
 
                   }
                }
@@ -169,7 +180,7 @@ namespace coldetector
                   pc_test_->publish(pcl2_msg);
                }
             }
-            cout << "\n\n";
+            //cout << "\n\n";
             FramesUpdate(current_imgs_frame_);  
          }
          // Stops this thread if requested by the main program
@@ -268,7 +279,7 @@ namespace coldetector
          matcher->knnMatch(descriptors_previous_i, descriptors_current_i, knn_matches,2);
 
          // Filtering of matches by Lowe's ratio test
-         const float ratio_threshold = 0.8f;
+         const float ratio_threshold = 0.7f;
          for(size_t i=0; i < knn_matches.size(); i++){
             if(knn_matches[i][0].distance < ratio_threshold * knn_matches[i][1].distance){
                best_matches.push_back(knn_matches[i][0]);
@@ -338,7 +349,8 @@ namespace coldetector
 
    void CollisionDetector::TriangulatePoints(const cv::Mat &base_Tcam, const cv::Mat cam_K, const cv::Mat & current_T_previous, const std::vector <cv::KeyPoint> &keypoints_previous_i, const std::vector <cv::KeyPoint> &keypoints_current_i, 
                            const cv::Mat &descriptors_previous_i, const cv::Mat &descriptors_current_i, const std::vector<cv::DMatch>& filtered_matches, const cv::Mat &world_Tcurrent_base, bool b_to_world, 
-                           std::vector<cv::Mat> &final_3d_pts, std::vector<double> &points_keypoints, cv::Mat &final_descriptors){
+                           std::vector<cv::Mat> &final_3d_pts, std::vector<double> &points_keypoints, cv::Mat &final_descriptors,
+                           std::vector <cv::KeyPoint> &keypoints_previous_new, std::vector <cv::KeyPoint> &keypoints_current_new,cv::Mat &descriptors_previous_new,cv::Mat &descriptors_current_new){
       // find the projective matrices of both frames
       cv::Mat P_previous, P_current, P_pdebug, P_cdebug;
       ComputeProjectionMatrices(cam_K,current_T_previous,P_previous,P_current);
@@ -380,6 +392,12 @@ namespace coldetector
          cv::Point2f feat_img_1 = keypoints_previous_i[filtered_matches[pt_i].queryIdx].pt;
          cv::Point2f feat_img_2 = keypoints_current_i[filtered_matches[pt_i].trainIdx].pt;
 
+         //for(auto p: keypoints_previous_i){
+         //   cout << "keypt: " << p.pt << endl; 
+         //}
+         //cout << "idx:" << pt_i << " match idx: " << filtered_matches[pt_i].queryIdx << " query:" << keypoints_previous_i[filtered_matches[pt_i].queryIdx].pt << endl;
+         //cout << "idx:" << pt_i << " match idx: " << filtered_matches[pt_i].trainIdx << " train:" << keypoints_previous_i[filtered_matches[pt_i].trainIdx].pt << endl;
+
          pt_cam_previous = pt_cam_previous/pt_cam_previous.at<double>(2,0);
          pt_cam_current = pt_cam_current/pt_cam_current.at<double>(2,0);
 
@@ -399,7 +417,17 @@ namespace coldetector
          final_3d_pts.push_back(pt_cam_current);
 
          // Adding the descriptor of the point
-         points_keypoints.insert(points_keypoints.end(), {cv::saturate_cast<double>(feat_img_1.x),cv::saturate_cast<double>(feat_img_1.y)});
+         //cout << "A\n";
+         
+         keypoints_previous_new.push_back(keypoints_previous_i[filtered_matches[pt_i].queryIdx]);
+         keypoints_current_new.push_back(keypoints_current_i[filtered_matches[pt_i].trainIdx]);
+         descriptors_previous_new.push_back(descriptors_previous_i.row(filtered_matches[pt_i].queryIdx));
+         descriptors_current_new.push_back(descriptors_current_i.row(filtered_matches[pt_i].trainIdx));
+         //cout << "shape:"<<descriptors_current_new.rows << ","<<descriptors_current_new.cols << endl;
+
+         //int x;
+         //cin >> x;
+         points_keypoints.insert(points_keypoints.end(), {cv::saturate_cast<double>(feat_img_2.x),cv::saturate_cast<double>(feat_img_2.y)});
          final_descriptors.push_back(descriptors_current_i.row(filtered_matches[pt_i].trainIdx));
       }
    }
