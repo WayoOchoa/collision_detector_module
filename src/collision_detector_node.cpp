@@ -152,7 +152,7 @@ class CollisionNode{
             image_sub_cam4_.subscribe(it_,"/ladybug5/image_color",m_queueSize);
             image_sub_cam5_.subscribe(it_,"/ladybug6/image_color",m_queueSize);
             // Girona Navigation subscribers
-            odometry_sub_.subscribe(nh_,"/navigator/odometry",m_queueSize); // TODO: ASK why navigator/odometry is not working. is the dynamics one the same?
+            odometry_sub_.subscribe(nh_,"/dynamics/odometry",m_queueSize); // TODO: ASK why navigator/odometry is not working. is the dynamics one the same?
             navigation_sub_.subscribe(nh_,"/navigator/navigation",m_queueSize);
             // Sync policy for the camera messages
             m_approximateSync.reset(new ApproximateSync( ApproximatePolicy(policy_queuesize), image_sub_cam0_, image_sub_cam1_,
@@ -172,7 +172,12 @@ class CollisionNode{
             bool b_frame_incomplete = false;
 
             // Defining the current pose of the robot
-            double roll = navigation_msg->orientation.roll, pitch = navigation_msg->orientation.pitch, yaw = navigation_msg->orientation.yaw;
+            //double roll = navigation_msg->orientation.roll, pitch = navigation_msg->orientation.pitch, yaw = navigation_msg->orientation.yaw;
+            double quatx = odometry_msg->pose.pose.orientation.x, quaty = odometry_msg->pose.pose.orientation.y, quatz = odometry_msg->pose.pose.orientation.z, quatw = odometry_msg->pose.pose.orientation.w;
+            tf::Quaternion q(quatx,quaty,quatz,quatw);
+            tf::Matrix3x3 orientation_mat(q);
+            double roll, pitch, yaw;
+            orientation_mat.getRPY(roll,pitch,yaw);
             cv::Mat rotation_roll_matrix = (cv::Mat_<double>(4,4) << 1,0,0,0,
                     0,cos(roll),-sin(roll),0,
                     0,sin(roll),cos(roll),0,
