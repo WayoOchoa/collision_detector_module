@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['images_5f_0',['images_',['../classcoldetector_1_1MultiFrame.html#a6b1158566c1c11a52f57b5ba1fb7852a',1,'coldetector::MultiFrame']]]
+  ['nrcams_0',['nrCams',['../classcoldetector_1_1MultiFrame.html#ad377f851a792cc484acf0ce3173ed81e',1,'coldetector::MultiFrame']]]
 ];

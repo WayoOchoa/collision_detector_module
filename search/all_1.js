@@ -7,7 +7,7 @@ var searchData=
   ['collision_20detection_20and_20avoidance_20for_20auv_4',['Collision Detection and Avoidance for AUV',['../md_README.html',1,'']]],
   ['collisiondetector_5',['CollisionDetector',['../classcoldetector_1_1CollisionDetector.html',1,'coldetector']]],
   ['collisionnode_6',['CollisionNode',['../classCollisionNode.html',1,'CollisionNode'],['../classCollisionNode.html#a21ec99403f4c69ed3228b5d94d3dc86b',1,'CollisionNode::CollisionNode()']]],
-  ['computefeatures_7',['ComputeFeatures',['../classcoldetector_1_1CollisionDetector.html#af385733b461bda4f537cb97f7616a352',1,'coldetector::CollisionDetector']]],
+  ['computefeatures_7',['ComputeFeatures',['../classcoldetector_1_1CollisionDetector.html#a57aa2faad97d24f7fbff0c3907340649',1,'coldetector::CollisionDetector']]],
   ['computefundamentalmatrix_8',['ComputeFundamentalMatrix',['../classcoldetector_1_1CollisionDetector.html#ada1b7a3f4693f782da90feb111a59acc',1,'coldetector::CollisionDetector']]],
   ['computematchesallvsall_9',['ComputeMatchesAllvsAll',['../classcoldetector_1_1CollisionDetector.html#a1cf35720359d0e9571e8ec233b6c2238',1,'coldetector::CollisionDetector']]],
   ['computeprojectionmatrices_10',['ComputeProjectionMatrices',['../classcoldetector_1_1CollisionDetector.html#a432e4c735be67180cc599c2353e00beb',1,'coldetector::CollisionDetector']]],

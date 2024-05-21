@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['images_5f_0',['images_',['../classcoldetector_1_1MultiFrame.html#a6b1158566c1c11a52f57b5ba1fb7852a',1,'coldetector::MultiFrame']]]
+  ['loadmcs_0',['LoadMCS',['../classcoldetector_1_1cSystem.html#a2ed616464e420665b46a0ca5a8de41e4',1,'coldetector::cSystem']]],
+  ['loadparameters_1',['loadParameters',['../classCollisionNode.html#a284d796874c95ff2a412bb7ffe3822c1',1,'CollisionNode']]]
 ];
