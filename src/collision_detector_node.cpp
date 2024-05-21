@@ -71,7 +71,7 @@ class CollisionNode{
          * Filters for synchronizing the image messages
         */
         typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::Image, sensor_msgs::Image, sensor_msgs::Image, 
-                sensor_msgs::Image, sensor_msgs::Image, sensor_msgs::Image,nav_msgs::Odometry, cola2_msgs::NavSts> ApproximatePolicy;
+                sensor_msgs::Image, sensor_msgs::Image, sensor_msgs::Image,nav_msgs::Odometry> ApproximatePolicy;
         typedef message_filters::Synchronizer<ApproximatePolicy> ApproximateSync;
         boost::shared_ptr<ApproximateSync> m_approximateSync;
         image_transport::ImageTransport it_;
@@ -79,7 +79,6 @@ class CollisionNode{
          * Girona500/1000 Navigation subscribers
         */
         message_filters::Subscriber<nav_msgs::Odometry> odometry_sub_;
-        message_filters::Subscriber<cola2_msgs::NavSts> navigation_sub_;
         /**
          * Callable service to transfer data to the collision detection thread
         */
@@ -152,12 +151,11 @@ class CollisionNode{
             image_sub_cam4_.subscribe(it_,"/ladybug5/image_color",m_queueSize);
             image_sub_cam5_.subscribe(it_,"/ladybug6/image_color",m_queueSize);
             // Girona Navigation subscribers
-            odometry_sub_.subscribe(nh_,"/dynamics/odometry",m_queueSize); // TODO: ASK why navigator/odometry is not working. is the dynamics one the same?
-            navigation_sub_.subscribe(nh_,"/navigator/navigation",m_queueSize);
+            odometry_sub_.subscribe(nh_,"/dynamics/odometry",m_queueSize); // /dynamics/odometry is the odometry without noise
             // Sync policy for the camera messages
             m_approximateSync.reset(new ApproximateSync( ApproximatePolicy(policy_queuesize), image_sub_cam0_, image_sub_cam1_,
-                image_sub_cam2_, image_sub_cam3_, image_sub_cam4_, image_sub_cam5_, odometry_sub_, navigation_sub_));
-            m_approximateSync->registerCallback(boost::bind(&CollisionNode::SyncImageCallback, this, _1, _2, _3, _4, _5, _6, _7, _8));
+                image_sub_cam2_, image_sub_cam3_, image_sub_cam4_, image_sub_cam5_, odometry_sub_));
+            m_approximateSync->registerCallback(boost::bind(&CollisionNode::SyncImageCallback, this, _1, _2, _3, _4, _5, _6, _7));
         };
         ~CollisionNode(){m_approximateSync.reset();};
 
@@ -168,11 +166,10 @@ class CollisionNode{
         */
         void SyncImageCallback(const sensor_msgs::ImageConstPtr& msg0,const sensor_msgs::ImageConstPtr& msg1, const sensor_msgs::ImageConstPtr& msg2,
             const sensor_msgs::ImageConstPtr& msg3,const sensor_msgs::ImageConstPtr& msg4,const sensor_msgs::ImageConstPtr& msg5,
-            const nav_msgs::OdometryConstPtr& odometry_msg, const cola2_msgs::NavStsConstPtr& navigation_msg){
+            const nav_msgs::OdometryConstPtr& odometry_msg){
             bool b_frame_incomplete = false;
 
             // Defining the current pose of the robot
-            //double roll = navigation_msg->orientation.roll, pitch = navigation_msg->orientation.pitch, yaw = navigation_msg->orientation.yaw;
             double quatx = odometry_msg->pose.pose.orientation.x, quaty = odometry_msg->pose.pose.orientation.y, quatz = odometry_msg->pose.pose.orientation.z, quatw = odometry_msg->pose.pose.orientation.w;
             tf::Quaternion q(quatx,quaty,quatz,quatw);
             tf::Matrix3x3 orientation_mat(q);

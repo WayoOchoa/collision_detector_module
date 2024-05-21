@@ -1,3 +1,4 @@
+std_msgs/Header header
 sensor_msgs/PointCloud2 points3d
 float64[] descriptors
 float64[] keypoints

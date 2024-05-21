@@ -134,6 +134,8 @@ namespace coldetector
                   collision_detection_module::DescribedPointCloud msg;
                   sensor_msgs::PointCloud2 pcl2_msg;
                   sensor_msgs::PointCloud pcl_msg;
+
+                  msg.header.stamp = ros::Time::now();
                   
                   for(int p = 0; p < final_3d_points.size(); p++){
                      geometry_msgs::Point32 point;
@@ -389,7 +391,7 @@ namespace coldetector
          if(cv::sqrt(errXcurrent * errXcurrent + errYcurrent * errYcurrent) > 4.0) continue;
 
          // Convert the point in camera frame previous to the current cam frame.
-         pt_cam_current = base_Tcam * pt_hom;
+         pt_cam_current = base_Tcam * current_T_previous * pt_hom;
          // If the point is referrenced to the world
          if(b_to_world) pt_cam_current = world_Tcurrent_base * pt_cam_current;
          final_3d_pts.push_back(pt_cam_current);
