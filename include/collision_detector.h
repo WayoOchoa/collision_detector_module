@@ -255,18 +255,6 @@ namespace coldetector
              * @param dst Output vector of N-1-dimensional points.
              */
             void homogeneousToEuclidean(cv::InputArray src, cv::OutputArray dst);
-            /**
-             * @brief Computes the uncertainty related to a triangulated 3D point from its 2D correspondences in two images.
-             * @param xl Input vector with first 2d point.
-             * @param xr Input vector with second 2d point.
-             * @param Pl Input 3x4 first projection matrix.
-             * @param Pr Input 3x4 second projection matrix.
-             * @param pixel_range How many pixels are considered from the original 2d point to extract the uncertainty.
-             * @param fbehind_camera Flag that indicates if the point is behind the camera.
-             * @param z_deviation Output number of the spread of the 3D point in the z direction. 
-            */
-            void triangulatedPointUncertainty(const cv::Vec2d &xl, const cv::Vec2d &xr, const cv::Matx34d &Pl, const cv::Matx34d &Pr,
-                                            const int pixel_range, bool &fbehind_camera, float &z_deviation);
 
             // Data memebers
             bool b_new_data_;

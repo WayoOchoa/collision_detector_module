@@ -525,15 +525,8 @@ namespace coldetector
         {
             Vec3d point3d;
             triangulateDLT( Vec2d(xl(0,i), xl(1,i)), Vec2d(xr(0,i), xr(1,i)), Pl, Pr, point3d );
-            //Calculate the amount of uncertainty in the depth measurement
-            float z_error;
-            bool f_behind_cam = false;
-            float triangulation_error_threshold = 0.02; // Error in the variance of the depth values expressed in m(?)
-            
-            if(z_error <= triangulation_error_threshold && f_behind_cam==false){
-               for(char j=0; j<3; ++j)
-                points3d.at<double>(j, i) = point3d[j];
-            }
+            for(char j=0; j<3; ++j)
+               points3d.at<double>(j, i) = point3d[j];
         }
    }
 
@@ -551,22 +544,6 @@ namespace coldetector
       cv::SVD::solveZ(design, XHomogeneous);
       homogeneousToEuclidean(XHomogeneous, point3d);
    }
-
-   void CollisionDetector::triangulatedPointUncertainty(const cv::Vec2d &xl, const cv::Vec2d &xr, const cv::Matx34d &Pl, const cv::Matx34d &Pr,const int pixel_range, bool &fbehind_camera, float &z_deviation){
-      // Compute four 3D points separate by an amount of pixel_range (equidistant from the original xl-xr position)
-      Vec3d point3d_right, point3d_bottom, point3d_left, point3d_top;
-      triangulateDLT( Vec2d(xl(0)+1, xl(1)), Vec2d(xr(0)+1, xr(1)), Pl, Pr, point3d_right);
-      triangulateDLT( Vec2d(xl(0), xl(1)+1), Vec2d(xr(0), xr(1)+1), Pl, Pr, point3d_bottom);
-      triangulateDLT( Vec2d(xl(0)-1, xl(1)), Vec2d(xr(0)-1, xr(1)), Pl, Pr, point3d_left);
-      triangulateDLT( Vec2d(xl(0), xl(1)-1), Vec2d(xr(0), xr(1)-1), Pl, Pr, point3d_top);
-
-      Eigen::Vector4f z_measures = Eigen::Vector4f(point3d_right(2),point3d_bottom(2),point3d_left(2),point3d_top(2));
-      if(z_measures.mean() <= 0){
-         fbehind_camera = true;
-      }
-      z_deviation = std::abs(z_measures.maxCoeff() - z_measures.minCoeff());
-   }
-   
 
    // Creates the projection matrices out of the Rotation and translation parameters between two frames
    void CollisionDetector::ComputeProjectionMatrices(const cv::Mat cam_K, const cv::Mat &current_T_previous, cv::Mat &P_previous, cv::Mat &P_current){
