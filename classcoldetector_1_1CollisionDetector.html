@@ -170,6 +170,12 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>assignChassisPoints</
 <tr class="memitem:aa8435c9a6f61369e3dcfe92e9dc1945a" id="r_aa8435c9a6f61369e3dcfe92e9dc1945a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa8435c9a6f61369e3dcfe92e9dc1945a">homogeneousToEuclidean</a> (cv::InputArray src, cv::OutputArray dst)</td></tr>
 <tr class="memdesc:aa8435c9a6f61369e3dcfe92e9dc1945a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts point coordinates from homogeneours to euclidean coordinates.  <br /></td></tr>
 <tr class="separator:aa8435c9a6f61369e3dcfe92e9dc1945a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abee6ac7bed74d20c7b6f9d7460a1c903" id="r_abee6ac7bed74d20c7b6f9d7460a1c903"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#abee6ac7bed74d20c7b6f9d7460a1c903">euclideanToHomogeneous</a> (cv::InputArray src, cv::OutputArray dst)</td></tr>
+<tr class="memdesc:abee6ac7bed74d20c7b6f9d7460a1c903"><td class="mdescLeft">&#160;</td><td class="mdescRight">From OpenCv sfm library: Converts points from Euclidean to homogeneous space. E.g., ((x,y)-&gt;(x,y,1))  <br /></td></tr>
+<tr class="separator:abee6ac7bed74d20c7b6f9d7460a1c903"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab394adb320003589ff5dd80e07352439" id="r_ab394adb320003589ff5dd80e07352439"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab394adb320003589ff5dd80e07352439">projectionFromKRt</a> (cv::InputArray K, cv::InputArray R, cv::InputArray t, cv::OutputArray P)</td></tr>
+<tr class="memdesc:ab394adb320003589ff5dd80e07352439"><td class="mdescLeft">&#160;</td><td class="mdescRight">From OpenCv sfm library: Get projection matrix P from K, R and t.  <br /></td></tr>
+<tr class="separator:ab394adb320003589ff5dd80e07352439"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a94abb97b8bce8c4c839ba36696667adc" id="r_a94abb97b8bce8c4c839ba36696667adc"><td class="memItemLeft" align="right" valign="top"><a id="a94abb97b8bce8c4c839ba36696667adc" name="a94abb97b8bce8c4c839ba36696667adc"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>StopRequest</b> ()</td></tr>
 <tr class="memdesc:a94abb97b8bce8c4c839ba36696667adc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stops the thread when requested from the main program. <br /></td></tr>
@@ -428,6 +434,36 @@ std::mutex&#160;</td><td class="memItemRight" valign="bottom"><b>mMutexStop</b><
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>distance The orthogonal distance from the point to the line. </dd></dl>
+
+</div>
+</div>
+<a id="abee6ac7bed74d20c7b6f9d7460a1c903" name="abee6ac7bed74d20c7b6f9d7460a1c903"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abee6ac7bed74d20c7b6f9d7460a1c903">&#9670;&#160;</a></span>euclideanToHomogeneous()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void coldetector::CollisionDetector::euclideanToHomogeneous </td>
+          <td>(</td>
+          <td class="paramtype">cv::InputArray</td>          <td class="paramname"><span class="paramname"><em>src</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">cv::OutputArray</td>          <td class="paramname"><span class="paramname"><em>dst</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>From OpenCv sfm library: Converts points from Euclidean to homogeneous space. E.g., ((x,y)-&gt;(x,y,1)) </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">src</td><td>Input vector of N-dimensional points. </td></tr>
+    <tr><td class="paramname">dst</td><td>Output vector of N+1-dimensional points. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -722,6 +758,49 @@ std::mutex&#160;</td><td class="memItemRight" valign="bottom"><b>mMutexStop</b><
   </table>
   </dd>
 </dl>
+
+</div>
+</div>
+<a id="ab394adb320003589ff5dd80e07352439" name="ab394adb320003589ff5dd80e07352439"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab394adb320003589ff5dd80e07352439">&#9670;&#160;</a></span>projectionFromKRt()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void coldetector::CollisionDetector::projectionFromKRt </td>
+          <td>(</td>
+          <td class="paramtype">cv::InputArray</td>          <td class="paramname"><span class="paramname"><em>K</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">cv::InputArray</td>          <td class="paramname"><span class="paramname"><em>R</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">cv::InputArray</td>          <td class="paramname"><span class="paramname"><em>t</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">cv::OutputArray</td>          <td class="paramname"><span class="paramname"><em>P</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>From OpenCv sfm library: Get projection matrix P from K, R and t. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">K</td><td>Input 3x3 camera matrix <picture><source srcset="form_0_dark.png" media="(prefers-color-scheme: dark)"/><img class="formulaInl" alt="$K = \vecthreethree{f_x}{0}{c_x}{0}{f_y}{c_y}{0}{0}{1}$" src="form_0.png"/></picture>. </td></tr>
+    <tr><td class="paramname">R</td><td>Input 3x3 rotation matrix. </td></tr>
+    <tr><td class="paramname">t</td><td>Input 3x1 translation vector. </td></tr>
+    <tr><td class="paramname">P</td><td>Output 3x4 projection matrix.</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>This function estimate the projection matrix by solving the following equation: <picture><source srcset="form_1_dark.png" media="(prefers-color-scheme: dark)"/><img class="formulaInl" alt="$P = K * [R|t]$" src="form_1.png"/></picture> </p>
 
 </div>
 </div>
