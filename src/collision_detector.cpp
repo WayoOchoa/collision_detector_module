@@ -29,6 +29,26 @@ DECLARE_double(sigma);
 
 namespace coldetector
 {
+   // Overloaded function of homogeneous to Euclidean
+   template<typename T>
+   void homogeneousToEuclidean(const cv::Mat & X_, cv::Mat & x_){
+     int d = X_.rows - 1;
+
+     const cv::Mat_<T> & X_rows = X_.rowRange(0,d);
+     const cv::Mat_<T> h = X_.row(d);
+
+     const T * h_ptr = h[0], *h_ptr_end = h_ptr + h.cols;
+     const T * X_ptr = X_rows[0];
+     T * x_ptr = x_.ptr<T>(0);
+     for (; h_ptr != h_ptr_end; ++h_ptr, ++X_ptr, ++x_ptr)
+     {
+       const T * X_col_ptr = X_ptr;
+       T * x_col_ptr = x_ptr, *x_col_ptr_end = x_col_ptr + d * x_.step1();
+       for (; x_col_ptr != x_col_ptr_end; X_col_ptr+=X_rows.step1(), x_col_ptr+=x_.step1() )
+         *x_col_ptr = (*X_col_ptr) / (*h_ptr);
+     }
+   }
+
    CollisionDetector::CollisionDetector(cSystem *cam_system, ros::Publisher* pc_pub, ros::Publisher *pc_test):
    b_new_data_(false), b_do_clahe_(FLAGS_clahe_processing), b_matching_all_all_(FLAGS_matching_all_vs_all), bFinishRequested_(false),
    b_pointcloud_in_world_(FLAGS_point_cloud_in_world), b_consider_chassis_b_(FLAGS_consider_chassis), cam_system_(cam_system), pc_pub_(pc_pub),
@@ -120,6 +140,7 @@ namespace coldetector
 
                   // 4. Triangulation step
                   if(filtered_matches.size() > 0){
+                     cout << "cam_id: " << cam_id << endl;
                      TriangulatePoints(base_Tcam, cam_system_->getK_c(cam_id), cam_current_Tcam_previous, keypoints_previous_i, 
                                        keypoints_current_i, descriptors_previous_i, descriptors_current_i,
                                        filtered_matches, world_Tcurrent_base, true, final_3d_points, points_keypoints, points_descriptors);
@@ -297,14 +318,17 @@ namespace coldetector
             idx_eigenvalue_left = i;
          }
       }
-      // Check that the epipole in the current frame is not inside the image
-      Eigen::Vector3cf epipole_right = eigen_matrix_right.eigenvectors().col(idx_eigenvalue_right)/eigen_matrix_right.eigenvectors().col(idx_eigenvalue_right)[2];
-      // Check that the epipole in the previous frame is not inside the image
-      Eigen::Vector3cf epipole_left = eigen_matrix_left.eigenvectors().col(idx_eigenvalue_left)/eigen_matrix_left.eigenvectors().col(idx_eigenvalue_left)[2];
-      if((epipole_left[0].real() > 0 && epipole_left[0].real() <= img_width) && (epipole_left[1].real() > 0 && epipole_left[1].real() <= img_height) ||
-      (epipole_right[0].real() > 0 && epipole_right[0].real() <= img_width) && (epipole_right[1].real() > 0 && epipole_right[1].real() <= img_height)){
-         filtered_matches = best_matches;
-         return;
+
+      if((idx_eigenvalue_right >= 0 && idx_eigenvalue_right <=2)&&(idx_eigenvalue_left >= 0 && idx_eigenvalue_left <=2)){
+         // Check that the epipole in the current frame is not inside the image
+         Eigen::Vector3cf epipole_right = eigen_matrix_right.eigenvectors().col(idx_eigenvalue_right)/eigen_matrix_right.eigenvectors().col(idx_eigenvalue_right)[2];
+         // Check that the epipole in the previous frame is not inside the image
+         Eigen::Vector3cf epipole_left = eigen_matrix_left.eigenvectors().col(idx_eigenvalue_left)/eigen_matrix_left.eigenvectors().col(idx_eigenvalue_left)[2];
+         if((epipole_left[0].real() > 0 && epipole_left[0].real() <= img_width) && (epipole_left[1].real() > 0 && epipole_left[1].real() <= img_height) ||
+         (epipole_right[0].real() > 0 && epipole_right[0].real() <= img_width) && (epipole_right[1].real() > 0 && epipole_right[1].real() <= img_height)){
+            filtered_matches = best_matches;
+            return;
+         }
       }
 
       // Compute epipolar lines on the current image frame
@@ -338,31 +362,23 @@ namespace coldetector
                            const cv::Mat &descriptors_previous_i, const cv::Mat &descriptors_current_i, const std::vector<cv::DMatch>& filtered_matches, const cv::Mat &world_Tcurrent_base, bool b_to_world, 
                            std::vector<cv::Mat> &final_3d_pts, std::vector<double> &points_keypoints, cv::Mat &final_descriptors){
       // find the projective matrices of both frames
-      cv::Mat P_previous, P_current, P_pdebug, P_cdebug;
+      cv::Mat P_previous, P_current;
       ComputeProjectionMatrices(cam_K,current_T_previous,P_previous,P_current);
+      cout << "P_prev:\n"<<P_previous << "\nP_curr:\n"<<P_current << endl;
       // Adapting the projection matrices for later use with OpenCV
-      std::vector <cv::Mat> projection_matrices, p_mats_debug;
+      std::vector <cv::Mat> projection_matrices;
       std::vector <cv::Point2f> vec_filtered_matches_previous, vec_filtered_matches_current;
       projection_matrices.push_back(P_previous);
       projection_matrices.push_back(P_current);
       FromMatchesToVectorofPoints(keypoints_previous_i,keypoints_current_i,filtered_matches,vec_filtered_matches_previous,vec_filtered_matches_current);
       std::vector <cv::Mat> vec_filtered_points_2d;
-      std::vector <cv::Point2f> pt_prev, pt_curr;
-      pt_prev.push_back(cv::Point2f(100,50));
-      pt_curr.push_back(cv::Point2f(70,50));
       GetArrayOfPoints(vec_filtered_matches_previous, vec_filtered_matches_current, vec_filtered_points_2d);
 
       // Triangulation with OpenCV
       cv::Mat triangulated_points;
-      cv::sfm::triangulatePoints(vec_filtered_points_2d,projection_matrices,triangulated_points);
-
-      // Projection matrix of previous w.r.t. current
-      cv::Mat current_P_previous;
-      cv::Mat rotation = current_T_previous(cv::Range(0, 3), cv::Range(0, 3) );
-      cv::Mat translation = (cv::Mat_<double>(3,1) << current_T_previous.at<double>(0,3),
-              current_T_previous.at<double>(1,3),
-              current_T_previous.at<double>(2,3));
-      cv::sfm::projectionFromKRt(cam_K,rotation,translation,current_P_previous);
+      int pixel_range = 1; // TODO: make it a parameter for modifying 
+      triangulatePoints2Views(vec_filtered_points_2d,projection_matrices,pixel_range,triangulated_points);
+      //cv::sfm::triangulatePoints(vec_filtered_points_2d,projection_matrices,triangulated_points);
       
       /// Check 3D points
       for(int pt_i = 0; pt_i < triangulated_points.size().width; pt_i++){
@@ -402,6 +418,114 @@ namespace coldetector
       }
    }
 
+   void CollisionDetector::homogeneousToEuclidean(cv::InputArray X_, cv::OutputArray x_){
+      // src
+      const cv::Mat X = X_.getMat();
+      
+      // dst
+      x_.create(X.rows-1, X.cols, X.type());
+      cv::Mat x = x_.getMat();
+      
+      // type
+      if( X.depth() == CV_32F ){
+         coldetector::homogeneousToEuclidean<float>(X,x);
+      }
+      else{
+         coldetector::homogeneousToEuclidean<double>(X,x);
+      }
+   }
+
+   // Performs the triangulation of 3D points from a set of 2d correspondences between two frames
+   void CollisionDetector::triangulatePoints2Views(cv::InputArrayOfArrays _points2d, cv::InputArrayOfArrays _projection_matrices, 
+                                                   const int &pixel_range,cv::OutputArray _points3d){
+      // inputs
+      size_t nviews = (unsigned) _points2d.total();
+      size_t n_points;
+      std::vector<Mat_<double>> points2d(nviews);
+      std::vector<Matx34d> projection_matrices(nviews);
+      {
+         std::vector<Mat> points2d_tmp;
+        _points2d.getMatVector(points2d_tmp);
+        n_points = points2d_tmp[0].cols;
+
+        std::vector<Mat> projection_matrices_tmp;
+        _projection_matrices.getMatVector(projection_matrices_tmp);
+
+        // Make sure the dimensions are right
+        for(size_t i=0; i<nviews; ++i){
+            CV_Assert(points2d_tmp[i].rows == 2 && points2d_tmp[i].cols == n_points);
+            if (points2d_tmp[i].type() == CV_64F)
+                points2d[i] = points2d_tmp[i];
+            else
+                points2d_tmp[i].convertTo(points2d[i], CV_64F);
+
+            CV_Assert(projection_matrices_tmp[i].rows == 3 && projection_matrices_tmp[i].cols == 4);
+            if (projection_matrices_tmp[i].type() == CV_64F)
+              projection_matrices[i] = projection_matrices_tmp[i];
+            else
+              projection_matrices_tmp[i].convertTo(projection_matrices[i], CV_64F);
+        }  
+      }
+
+      // output
+      _points3d.create(3, n_points, CV_64F);
+      cv::Mat points3d = _points3d.getMat();
+
+      const Mat_<double> &xl = points2d[0], &xr = points2d[1];
+
+        const Matx34d & Pl = projection_matrices[0];    // left matrix projection
+        const Matx34d & Pr = projection_matrices[1];    // right matrix projection
+
+        // triangulate
+        for( unsigned i = 0; i < n_points; ++i )
+        {
+            Vec3d point3d;
+            triangulateDLT( Vec2d(xl(0,i), xl(1,i)), Vec2d(xr(0,i), xr(1,i)), Pl, Pr, point3d );
+            //Calculate the amount of uncertainty in the depth measurement
+            float z_error;
+            bool f_behind_cam = false;
+            float triangulation_error_threshold = 0.02; // Error in the variance of the depth values expressed in m(?)
+            triangulatedPointUncertainty(Vec2d(xl(0,i), xl(1,i)), Vec2d(xr(0,i), xr(1,i)), Pl, Pr, pixel_range, f_behind_cam ,z_error);
+            
+            //cout << "error: " << z_error << endl;
+            if(z_error <= triangulation_error_threshold && f_behind_cam==false){
+               for(char j=0; j<3; ++j)
+                points3d.at<double>(j, i) = point3d[j];
+            }
+        }
+   }
+
+   void CollisionDetector::triangulateDLT(const cv::Vec2d &xl, const cv::Vec2d &xr, const cv::Matx34d &Pl, const cv::Matx34d &Pr, cv::Vec3d &point3d){
+      cv::Matx44d design;
+      for (int i = 0; i < 4; ++i)
+      {
+         design(0,i) = xl(0) * Pl(2,i) - Pl(0,i);
+         design(1,i) = xl(1) * Pl(2,i) - Pl(1,i);
+         design(2,i) = xr(0) * Pr(2,i) - Pr(0,i);
+         design(3,i) = xr(1) * Pr(2,i) - Pr(1,i);
+      }
+      
+      cv::Vec4d XHomogeneous;
+      cv::SVD::solveZ(design, XHomogeneous);
+      homogeneousToEuclidean(XHomogeneous, point3d);
+   }
+
+   void CollisionDetector::triangulatedPointUncertainty(const cv::Vec2d &xl, const cv::Vec2d &xr, const cv::Matx34d &Pl, const cv::Matx34d &Pr,const int pixel_range, bool &fbehind_camera, float &z_deviation){
+      // Compute four 3D points separate by an amount of pixel_range (equidistant from the original xl-xr position)
+      Vec3d point3d_right, point3d_bottom, point3d_left, point3d_top;
+      triangulateDLT( Vec2d(xl(0)+1, xl(1)), Vec2d(xr(0)+1, xr(1)), Pl, Pr, point3d_right);
+      triangulateDLT( Vec2d(xl(0), xl(1)+1), Vec2d(xr(0), xr(1)+1), Pl, Pr, point3d_bottom);
+      triangulateDLT( Vec2d(xl(0)-1, xl(1)), Vec2d(xr(0)-1, xr(1)), Pl, Pr, point3d_left);
+      triangulateDLT( Vec2d(xl(0), xl(1)-1), Vec2d(xr(0), xr(1)-1), Pl, Pr, point3d_top);
+
+      Eigen::Vector4f z_measures = Eigen::Vector4f(point3d_right(2),point3d_bottom(2),point3d_left(2),point3d_top(2));
+      if(z_measures.mean() <= 0){
+         fbehind_camera = true;
+      }
+      z_deviation = std::abs(z_measures.maxCoeff() - z_measures.minCoeff());
+   }
+   
+
    // Creates the projection matrices out of the Rotation and translation parameters between two frames
    void CollisionDetector::ComputeProjectionMatrices(const cv::Mat cam_K, const cv::Mat &current_T_previous, cv::Mat &P_previous, cv::Mat &P_current){
       cv::Mat reference = cv::Mat::eye(3,4,CV_64F); // Located at frame 1 at the moment
@@ -410,6 +534,7 @@ namespace coldetector
               current_T_previous.at<double>(1,3),
               current_T_previous.at<double>(2,3));
       // Projective matrix comes from multiplying the intrinsics by the rotation & translation
+      cout << "Baseline\n" << translation << endl;
       P_previous =  cam_K * reference;
       cv::sfm::projectionFromKRt(cam_K,rotation,translation,P_current);
    }

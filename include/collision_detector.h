@@ -220,6 +220,42 @@ namespace coldetector
              * @param array_of_points Set of points converted to an std::vector of cv::Mat.
             */
             void GetArrayOfPoints(std::vector<cv::Point2f> &points_frame1, std::vector<cv::Point2f> &points_frame2, std::vector<cv::Mat> &array_of_points);
+            /**
+             * @brief Performs the triangulation of 3D points given a set of 2D correspondences between two images and their respective Projection matrices
+             * @param _points2d 2D point correspondences from image left and right
+             * @param _projection_matrices Projection matrices of the two views
+             * @param pixel_range How many pixels are considered from the original 2d point to extract the uncertainty.
+             * @param _points3d Output matrix with the corresponding triangulated 3D points
+            */
+            void triangulatePoints2Views(cv::InputArrayOfArrays _points2d, cv::InputArrayOfArrays _projection_matrices, const int &pixel_range, cv::OutputArray _points3d);
+            /**
+             * @brief Triangulate points using DLT algorihtm
+             * @param xl Input vector with first 2d point.
+             * @param xr Input vector with second 2d point.
+             * @param Pl Input 3x4 first projection matrix.
+             * @param Pr Input 3x4 second projection matrix.
+             * @param point3d Output vector with computed 3d point. 
+             * 
+            */
+            void triangulateDLT(const cv::Vec2d &xl, const cv::Vec2d &xr, const cv::Matx34d &Pl, const cv::Matx34d &Pr, cv::Vec3d &point3d);
+            /**
+             * @brief Converts point coordinates from homogeneours to euclidean coordinates
+             * @param src Input vector of N-dimensional points.
+             * @param dst Output vector of N-1-dimensional points.
+             */
+            void homogeneousToEuclidean(cv::InputArray src, cv::OutputArray dst);
+            /**
+             * @brief Computes the uncertainty related to a triangulated 3D point from its 2D correspondences in two images.
+             * @param xl Input vector with first 2d point.
+             * @param xr Input vector with second 2d point.
+             * @param Pl Input 3x4 first projection matrix.
+             * @param Pr Input 3x4 second projection matrix.
+             * @param pixel_range How many pixels are considered from the original 2d point to extract the uncertainty.
+             * @param fbehind_camera Flag that indicates if the point is behind the camera.
+             * @param z_deviation Output number of the spread of the 3D point in the z direction. 
+            */
+            void triangulatedPointUncertainty(const cv::Vec2d &xl, const cv::Vec2d &xr, const cv::Matx34d &Pl, const cv::Matx34d &Pr,
+                                            const int pixel_range, bool &fbehind_camera, float &z_deviation);
 
             // Data memebers
             bool b_new_data_;
