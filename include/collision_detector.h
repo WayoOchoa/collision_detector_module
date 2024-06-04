@@ -255,6 +255,22 @@ namespace coldetector
              * @param dst Output vector of N-1-dimensional points.
              */
             void homogeneousToEuclidean(cv::InputArray src, cv::OutputArray dst);
+            /**
+             * @brief From OpenCv sfm library: Converts points from Euclidean to homogeneous space. E.g., ((x,y)->(x,y,1))
+             * @param src Input vector of N-dimensional points.
+             * @param dst Output vector of N+1-dimensional points.
+             */
+            void euclideanToHomogeneous(cv::InputArray src, cv::OutputArray dst);
+            /**
+             * @brief From OpenCv sfm library: Get projection matrix P from K, R and t.
+             * @param K Input 3x3 camera matrix \f$K = \vecthreethree{f_x}{0}{c_x}{0}{f_y}{c_y}{0}{0}{1}\f$.
+             * @param R Input 3x3 rotation matrix.
+             * @param t Input 3x1 translation vector.
+             * @param P Output 3x4 projection matrix.
+             * 
+             * This function estimate the projection matrix by solving the following equation: \f$P = K * [R|t]\f$
+             */
+            void projectionFromKRt(cv::InputArray K, cv::InputArray R, cv::InputArray t, cv::OutputArray P);
 
             // Data memebers
             bool b_new_data_;

@@ -49,6 +49,12 @@ namespace coldetector
      }
    }
 
+   // Overloaded function of Euclidean to Homogeneous
+   template<typename T>
+   void projectionFromKRt(const cv::Mat_<T> &K, const cv::Mat_<T> &R, const cv::Mat_<T> &t, cv::Mat_<T> P){
+      cv::hconcat( K*R, K*t, P );
+   }
+
    CollisionDetector::CollisionDetector(cSystem *cam_system, ros::Publisher* pc_pub, ros::Publisher *pc_test):
    b_new_data_(false), b_do_clahe_(FLAGS_clahe_processing), b_matching_all_all_(FLAGS_matching_all_vs_all), bFinishRequested_(false),
    b_pointcloud_in_world_(FLAGS_point_cloud_in_world), b_consider_chassis_b_(FLAGS_consider_chassis), cam_system_(cam_system), pc_pub_(pc_pub),
@@ -422,15 +428,14 @@ namespace coldetector
       cv::Mat triangulated_points;
       int pixel_range = 1; // TODO: make it a parameter for modifying 
       triangulatePoints2Views(vec_filtered_points_2d,projection_matrices,pixel_range,triangulated_points);
-      //cv::sfm::triangulatePoints(vec_filtered_points_2d,projection_matrices,triangulated_points);
       
       /// Check 3D points
       for(int pt_i = 0; pt_i < triangulated_points.size().width; pt_i++){
          cv::Mat pt_hom;
          cv::Mat pt_cam_previous, pt_cam_current;
-         sfm::euclideanToHomogeneous(triangulated_points.col(pt_i),pt_hom);
-         sfm::euclideanToHomogeneous(projection_matrices[0]*pt_hom,pt_cam_previous);
-         sfm::euclideanToHomogeneous(projection_matrices[1]*pt_hom,pt_cam_current);
+         euclideanToHomogeneous(triangulated_points.col(pt_i),pt_hom);
+         euclideanToHomogeneous(projection_matrices[0]*pt_hom,pt_cam_previous);
+         euclideanToHomogeneous(projection_matrices[1]*pt_hom,pt_cam_current);
          //// Filter points behind the camera (-z)
          if(pt_cam_previous.at<double>(2, 0) < 0.0 || pt_cam_current.at<double>(2, 0) < 0.0) continue;
 
@@ -477,6 +482,12 @@ namespace coldetector
       else{
          coldetector::homogeneousToEuclidean<double>(X,x);
       }
+   }
+
+   void CollisionDetector::euclideanToHomogeneous(cv::InputArray x_, cv::OutputArray X_){
+      const cv::Mat x = x_.getMat();
+      const cv::Mat last_row = cv::Mat::ones(1, x.cols, x.type());
+      cv::vconcat(x, last_row, X_);
    }
 
    // Performs the triangulation of 3D points from a set of 2d correspondences between two frames
@@ -554,7 +565,7 @@ namespace coldetector
               current_T_previous.at<double>(2,3));
       // Projective matrix comes from multiplying the intrinsics by the rotation & translation
       P_previous =  cam_K * reference;
-      cv::sfm::projectionFromKRt(cam_K,rotation,translation,P_current);
+      projectionFromKRt(cam_K,rotation,translation,P_current);
    }
 
    // Transform points into a InputArrayOfArrays
@@ -570,6 +581,27 @@ namespace coldetector
       array_of_points.push_back(points1Mat);
       array_of_points.push_back(points2Mat);
    }
+
+   void CollisionDetector::projectionFromKRt(cv::InputArray K_, cv::InputArray R_, cv::InputArray t_, cv::OutputArray P_){
+      const cv::Mat K = K_.getMat(), R = R_.getMat(), t = t_.getMat();
+      const int depth = K.depth();
+      CV_Assert((K.cols == 3 && K.rows == 3) && (t.cols == 1 && t.rows == 3) && (K.size() == R.size()));
+      CV_Assert((depth == CV_32F || depth == CV_64F) && depth == R.depth() && depth == t.depth());
+
+      P_.create(3, 4, depth);
+
+      cv::Mat P = P_.getMat();
+
+      // type
+      if( depth == CV_32F )
+      {
+        coldetector::projectionFromKRt<float>(K, R, t, P);
+      }
+      else
+      {
+        coldetector::projectionFromKRt<double>(K, R, t, P);
+      }
+   }     
 
    void CollisionDetector::assignChassisPoints(){
       // All points assigned to the chassis are w.r.t. the camera system axes. These
