@@ -5,7 +5,7 @@ from collision_detection_module.srv import *
 
 if __name__ == "__main__":
     rospy.init_node("service_caller",anonymous=True)
-    rate = rospy.Rate(10)
+    rate = rospy.Rate(50)
     rospy.wait_for_service("/collision_detector/transfer_frame_data")
     rospy.sleep(5)
     while not rospy.is_shutdown():

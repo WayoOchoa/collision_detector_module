@@ -121,6 +121,7 @@ namespace coldetector
                                  descriptors_current_i);
                   // Match keypoints between the two frames
                   std::vector<cv::DMatch> best_matches;
+                  std::vector<cv::DMatch> pre_filtered_matches;
                   std::vector<cv::DMatch> filtered_matches;
                   // Compute the fundamental matrix between the frames
                   cv::Mat current_Fprevious(3,3,CV_64F);
@@ -129,9 +130,12 @@ namespace coldetector
 
                   if(FLAGS_matching_all_vs_all){
                      ComputeMatchesAllvsAll(descriptors_previous_i,descriptors_current_i,best_matches);
-                     if(best_matches.size() > 0) {
+                     // Filtering points which rays are almost parallel (which will result in bad triangulated points)
+                     filterMatchesByAngleComparison(keypoints_previous_i, keypoints_current_i, world_Tprevious_base, world_Tcurrent_base, cam_system_->getK_c(cam_id), best_matches, pre_filtered_matches);
+                     if(pre_filtered_matches.size() > 0) {
                         static cv::Size2i img_size = previous_image_cam_i.size();
-                        FilterMatchesByEpipolarConstrain(keypoints_previous_i,keypoints_current_i,best_matches,current_Fprevious, img_size,filtered_matches);
+                        // Filtering the matches using eipolar geometry constraints
+                        FilterMatchesByEpipolarConstrain(keypoints_previous_i,keypoints_current_i,pre_filtered_matches,current_Fprevious, img_size,filtered_matches);
                      }                
                   }else{
                      // TODO: Epipolar matching
@@ -140,7 +144,6 @@ namespace coldetector
 
                   // 4. Triangulation step
                   if(filtered_matches.size() > 0){
-                     cout << "cam_id: " << cam_id << endl;
                      TriangulatePoints(base_Tcam, cam_system_->getK_c(cam_id), cam_current_Tcam_previous, keypoints_previous_i, 
                                        keypoints_current_i, descriptors_previous_i, descriptors_current_i,
                                        filtered_matches, world_Tcurrent_base, true, final_3d_points, points_keypoints, points_descriptors);
@@ -344,6 +347,48 @@ namespace coldetector
       }
    }
 
+   // Filter matches using cosine similarity between rays
+   void CollisionDetector::filterMatchesByAngleComparison(const std::vector<cv::KeyPoint> &keypoints_frame1, const std::vector<cv::KeyPoint> &keypoints_frame2, const cv::Mat &world_Tprevious_base,
+                           const cv::Mat &world_Tcurrent_base, const cv::Mat cam_K, const std::vector<cv::DMatch> &matches, std::vector<cv::DMatch>& filtered_matches){
+      // Define the similarity that is used as threshold of matches
+      const float angle_threshold_degree = 1;
+      const float cosine_threshold = cos((1*3.1415)/180); 
+      
+      // Extract the position vector of the camera's centres
+      cv::Mat world_camera_previous_position = (cv::Mat_<double>(3,1) << world_Tprevious_base.at<double>(0,3), world_Tprevious_base.at<double>(1,3), world_Tprevious_base.at<double>(2,3));
+      cv::Mat world_camera_current_position = (cv::Mat_<double>(3,1) << world_Tcurrent_base.at<double>(0,3), world_Tcurrent_base.at<double>(1,3), world_Tcurrent_base.at<double>(2,3));
+      // Extrinsic matrix as a 3x4 matrices
+      cv::Mat world_T_previous_pose = world_Tprevious_base(cv::Range(0, 3), cv::Range(0, 4));
+      cv::Mat world_T_current_pose = world_Tcurrent_base(cv::Range(0, 3), cv::Range(0, 4));
+
+      // Going through all point correspondences //keypoints_previous_i[filtered_matches[pt_i].queryIdx].pt
+      for(auto & match : matches){
+         // Getting the (u,v) and (u',v') location of the point correspondences
+         cv::Point2f feature_image_1 = keypoints_frame1[match.queryIdx].pt;
+         cv::Point2f feature_image_2 = keypoints_frame2[match.trainIdx].pt;
+         cv::Mat feat_img1_homogeneous = (cv::Mat_<double>(3,1) << feature_image_1.x, feature_image_1.y, 1);
+         cv::Mat feat_img2_homogeneous = (cv::Mat_<double>(3,1) << feature_image_2.x, feature_image_2.y, 1);
+         // Converting the points to world coordinates
+         cv::Mat feat_img1_cam_coordinates = cam_K.inv() * feat_img1_homogeneous;
+         cv::Mat feat_img2_cam_coordinates = cam_K.inv() * feat_img2_homogeneous;
+         cv::Mat feat_img1_cam_coordinates_hom = (cv::Mat_<double>(4,1) << feat_img1_cam_coordinates.at<double>(0,0), feat_img1_cam_coordinates.at<double>(1,0), feat_img1_cam_coordinates.at<double>(2,0), 1);
+         cv::Mat feat_img2_cam_coordinates_hom = (cv::Mat_<double>(4,1) << feat_img2_cam_coordinates.at<double>(0,0), feat_img2_cam_coordinates.at<double>(1,0), feat_img2_cam_coordinates.at<double>(2,0), 1);
+         cv::Mat feat_img1_world = world_T_previous_pose * feat_img1_cam_coordinates_hom;
+         cv::Mat feat_img2_world = world_T_current_pose * feat_img2_cam_coordinates_hom;
+         // Compute rays direction
+         cv::Mat feature_img1_ray = feat_img1_world(cv::Range(0, 3), cv::Range(0, 1)) - world_camera_previous_position;
+         cv::Mat feature_img2_ray = feat_img2_world(cv::Range(0, 3), cv::Range(0, 1)) - world_camera_current_position;
+         // Compute similarity
+         float cos = feature_img1_ray.dot(feature_img2_ray)/(cv::norm(feature_img1_ray) * cv::norm(feature_img2_ray));
+
+         //cout << "cos: " << cos << endl;
+
+         if(cos < cosine_threshold){
+            filtered_matches.push_back(match);
+         }
+      }
+   }
+
    // Transform a vector of DMatch into a one of Point2d
    void CollisionDetector::FromMatchesToVectorofPoints(const std::vector<cv::KeyPoint> &keypoints_frame1, const std::vector<cv::KeyPoint> &keypoints_frame2,
                                     const std::vector<cv::DMatch> &matches, std::vector <cv::Point2f> &points_frame1,std::vector <cv::Point2f> &points_frame2){
@@ -364,7 +409,6 @@ namespace coldetector
       // find the projective matrices of both frames
       cv::Mat P_previous, P_current;
       ComputeProjectionMatrices(cam_K,current_T_previous,P_previous,P_current);
-      cout << "P_prev:\n"<<P_previous << "\nP_curr:\n"<<P_current << endl;
       // Adapting the projection matrices for later use with OpenCV
       std::vector <cv::Mat> projection_matrices;
       std::vector <cv::Point2f> vec_filtered_matches_previous, vec_filtered_matches_current;
@@ -485,9 +529,7 @@ namespace coldetector
             float z_error;
             bool f_behind_cam = false;
             float triangulation_error_threshold = 0.02; // Error in the variance of the depth values expressed in m(?)
-            triangulatedPointUncertainty(Vec2d(xl(0,i), xl(1,i)), Vec2d(xr(0,i), xr(1,i)), Pl, Pr, pixel_range, f_behind_cam ,z_error);
             
-            //cout << "error: " << z_error << endl;
             if(z_error <= triangulation_error_threshold && f_behind_cam==false){
                for(char j=0; j<3; ++j)
                 points3d.at<double>(j, i) = point3d[j];
@@ -534,7 +576,6 @@ namespace coldetector
               current_T_previous.at<double>(1,3),
               current_T_previous.at<double>(2,3));
       // Projective matrix comes from multiplying the intrinsics by the rotation & translation
-      cout << "Baseline\n" << translation << endl;
       P_previous =  cam_K * reference;
       cv::sfm::projectionFromKRt(cam_K,rotation,translation,P_current);
    }

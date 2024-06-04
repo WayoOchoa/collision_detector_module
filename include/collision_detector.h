@@ -170,6 +170,17 @@ namespace coldetector
             void FilterMatchesByEpipolarConstrain(const std::vector <cv::KeyPoint> &keypoints_previous_i, const std::vector <cv::KeyPoint> &keypoints_current_i, 
                                                 const std::vector<cv::DMatch> &best_matches, const cv::Mat &F_matrix, const cv::Size2i &img_size, std::vector<cv::DMatch>& filtered_matches);
             /**
+             * @brief Computes the cosine similarity between the rays of point correpondences. If the rays are similar (parallel) in direction they are filtered and not count for triangulation.
+             * @param keypoints_frame1 Features detected on frame 1.
+             * @param keypoints_frame2 Features detected on frame 2.
+             * @param world_Tprevious_base Transformation of the camera origin w.r.t the world on the previous frame.
+             * @param world_Tcurrent_base Transformation of the camera origin w.r.t the world on the current frame.
+             * @param matches Vector of the computed matches between frames.
+             * @param filtered_matches Output vector with all the feature matches that satisfy the cosine similarity constraint
+             */
+            void filterMatchesByAngleComparison(const std::vector<cv::KeyPoint> &keypoints_frame1, const std::vector<cv::KeyPoint> &keypoints_frame2, const cv::Mat &world_Tprevious_base,
+                                                const cv::Mat &world_Tcurrent_base, const cv::Mat cam_K, const std::vector<cv::DMatch> &matches, std::vector<cv::DMatch>& filtered_matches);
+            /**
              * @brief Transforms a vector of DMatch type into a Point2d object
              * @param keypoints_frame1 Features detected on frame 1.
              * @param keypoints_frame2 Features detected on frame 2.
