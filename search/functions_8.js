@@ -1,7 +1,5 @@
 var searchData=
 [
-  ['setpinholecameramatrix_0',['setPinholeCameraMatrix',['../classcoldetector_1_1cSystem.html#a1c9a34c97024b1c08ec307e1597b5494',1,'coldetector::cSystem']]],
-  ['setsystemconfig_1',['setSystemConfig',['../classcoldetector_1_1cSystem.html#a8ca3e88843adf1d13af7744e49880096',1,'coldetector::cSystem']]],
-  ['stoprequest_2',['StopRequest',['../classcoldetector_1_1CollisionDetector.html#a94abb97b8bce8c4c839ba36696667adc',1,'coldetector::CollisionDetector']]],
-  ['syncimagecallback_3',['SyncImageCallback',['../classCollisionNode.html#aecaa701613e306a89054be9bf5faf0e2',1,'CollisionNode']]]
+  ['requeststop_0',['RequestStop',['../classCollisionNode.html#aeaa098ea9a4c2b0793a42b29667457bd',1,'CollisionNode']]],
+  ['run_1',['Run',['../classcoldetector_1_1CollisionDetector.html#aa09c4115cdb0c5e3c0ecb3a29d3aac96',1,'coldetector::CollisionDetector']]]
 ];

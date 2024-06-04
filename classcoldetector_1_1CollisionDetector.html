@@ -143,6 +143,9 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>assignChassisPoints</
 <tr class="memitem:a3e61edddcf515dc2ae467134521a6560" id="r_a3e61edddcf515dc2ae467134521a6560"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3e61edddcf515dc2ae467134521a6560">FilterMatchesByEpipolarConstrain</a> (const std::vector&lt; cv::KeyPoint &gt; &amp;keypoints_previous_i, const std::vector&lt; cv::KeyPoint &gt; &amp;keypoints_current_i, const std::vector&lt; cv::DMatch &gt; &amp;best_matches, const cv::Mat &amp;F_matrix, const cv::Size2i &amp;img_size, std::vector&lt; cv::DMatch &gt; &amp;filtered_matches)</td></tr>
 <tr class="memdesc:a3e61edddcf515dc2ae467134521a6560"><td class="mdescLeft">&#160;</td><td class="mdescRight">Uses epipolar geometry to filter the matches from a set of two images.  <br /></td></tr>
 <tr class="separator:a3e61edddcf515dc2ae467134521a6560"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3b4cf4f918610eb9897a78e73b4817f3" id="r_a3b4cf4f918610eb9897a78e73b4817f3"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3b4cf4f918610eb9897a78e73b4817f3">filterMatchesByAngleComparison</a> (const std::vector&lt; cv::KeyPoint &gt; &amp;keypoints_frame1, const std::vector&lt; cv::KeyPoint &gt; &amp;keypoints_frame2, const cv::Mat &amp;world_Tprevious_base, const cv::Mat &amp;world_Tcurrent_base, const cv::Mat cam_K, const std::vector&lt; cv::DMatch &gt; &amp;matches, std::vector&lt; cv::DMatch &gt; &amp;filtered_matches)</td></tr>
+<tr class="memdesc:a3b4cf4f918610eb9897a78e73b4817f3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Computes the cosine similarity between the rays of point correpondences. If the rays are similar (parallel) in direction they are filtered and not count for triangulation.  <br /></td></tr>
+<tr class="separator:a3b4cf4f918610eb9897a78e73b4817f3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2027843784c5be77bebbad2785de51a7" id="r_a2027843784c5be77bebbad2785de51a7"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2027843784c5be77bebbad2785de51a7">FromMatchesToVectorofPoints</a> (const std::vector&lt; cv::KeyPoint &gt; &amp;keypoints_frame1, const std::vector&lt; cv::KeyPoint &gt; &amp;keypoints_frame2, const std::vector&lt; cv::DMatch &gt; &amp;matches, std::vector&lt; cv::Point2f &gt; &amp;points_frame1, std::vector&lt; cv::Point2f &gt; &amp;points_frame2)</td></tr>
 <tr class="memdesc:a2027843784c5be77bebbad2785de51a7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Transforms a vector of DMatch type into a Point2d object.  <br /></td></tr>
 <tr class="separator:a2027843784c5be77bebbad2785de51a7"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -158,6 +161,15 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>assignChassisPoints</
 <tr class="memitem:abf7f01bfb82b58af9683d565a901659d" id="r_abf7f01bfb82b58af9683d565a901659d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#abf7f01bfb82b58af9683d565a901659d">GetArrayOfPoints</a> (std::vector&lt; cv::Point2f &gt; &amp;points_frame1, std::vector&lt; cv::Point2f &gt; &amp;points_frame2, std::vector&lt; cv::Mat &gt; &amp;array_of_points)</td></tr>
 <tr class="memdesc:abf7f01bfb82b58af9683d565a901659d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Adjust a set of cv:Point2f vector arrays into an InputArrayOfArrays object.  <br /></td></tr>
 <tr class="separator:abf7f01bfb82b58af9683d565a901659d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7dff57ae8e27d536b5b5452bebf8190f" id="r_a7dff57ae8e27d536b5b5452bebf8190f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7dff57ae8e27d536b5b5452bebf8190f">triangulatePoints2Views</a> (cv::InputArrayOfArrays _points2d, cv::InputArrayOfArrays _projection_matrices, const int &amp;pixel_range, cv::OutputArray _points3d)</td></tr>
+<tr class="memdesc:a7dff57ae8e27d536b5b5452bebf8190f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs the triangulation of 3D points given a set of 2D correspondences between two images and their respective Projection matrices.  <br /></td></tr>
+<tr class="separator:a7dff57ae8e27d536b5b5452bebf8190f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa51d36164e89c28c0506dadbc175ea2a" id="r_aa51d36164e89c28c0506dadbc175ea2a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa51d36164e89c28c0506dadbc175ea2a">triangulateDLT</a> (const cv::Vec2d &amp;xl, const cv::Vec2d &amp;xr, const cv::Matx34d &amp;Pl, const cv::Matx34d &amp;Pr, cv::Vec3d &amp;point3d)</td></tr>
+<tr class="memdesc:aa51d36164e89c28c0506dadbc175ea2a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Triangulate points using DLT algorihtm.  <br /></td></tr>
+<tr class="separator:aa51d36164e89c28c0506dadbc175ea2a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa8435c9a6f61369e3dcfe92e9dc1945a" id="r_aa8435c9a6f61369e3dcfe92e9dc1945a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa8435c9a6f61369e3dcfe92e9dc1945a">homogeneousToEuclidean</a> (cv::InputArray src, cv::OutputArray dst)</td></tr>
+<tr class="memdesc:aa8435c9a6f61369e3dcfe92e9dc1945a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts point coordinates from homogeneours to euclidean coordinates.  <br /></td></tr>
+<tr class="separator:aa8435c9a6f61369e3dcfe92e9dc1945a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a94abb97b8bce8c4c839ba36696667adc" id="r_a94abb97b8bce8c4c839ba36696667adc"><td class="memItemLeft" align="right" valign="top"><a id="a94abb97b8bce8c4c839ba36696667adc" name="a94abb97b8bce8c4c839ba36696667adc"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>StopRequest</b> ()</td></tr>
 <tr class="memdesc:a94abb97b8bce8c4c839ba36696667adc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stops the thread when requested from the main program. <br /></td></tr>
@@ -419,6 +431,65 @@ std::mutex&#160;</td><td class="memItemRight" valign="bottom"><b>mMutexStop</b><
 
 </div>
 </div>
+<a id="a3b4cf4f918610eb9897a78e73b4817f3" name="a3b4cf4f918610eb9897a78e73b4817f3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3b4cf4f918610eb9897a78e73b4817f3">&#9670;&#160;</a></span>filterMatchesByAngleComparison()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void coldetector::CollisionDetector::filterMatchesByAngleComparison </td>
+          <td>(</td>
+          <td class="paramtype">const std::vector&lt; cv::KeyPoint &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>keypoints_frame1</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; cv::KeyPoint &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>keypoints_frame2</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const cv::Mat &amp;</td>          <td class="paramname"><span class="paramname"><em>world_Tprevious_base</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const cv::Mat &amp;</td>          <td class="paramname"><span class="paramname"><em>world_Tcurrent_base</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const cv::Mat</td>          <td class="paramname"><span class="paramname"><em>cam_K</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; cv::DMatch &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>matches</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::vector&lt; cv::DMatch &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>filtered_matches</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Computes the cosine similarity between the rays of point correpondences. If the rays are similar (parallel) in direction they are filtered and not count for triangulation. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">keypoints_frame1</td><td>Features detected on frame 1. </td></tr>
+    <tr><td class="paramname">keypoints_frame2</td><td>Features detected on frame 2. </td></tr>
+    <tr><td class="paramname">world_Tprevious_base</td><td>Transformation of the camera origin w.r.t the world on the previous frame. </td></tr>
+    <tr><td class="paramname">world_Tcurrent_base</td><td>Transformation of the camera origin w.r.t the world on the current frame. </td></tr>
+    <tr><td class="paramname">matches</td><td>Vector of the computed matches between frames. </td></tr>
+    <tr><td class="paramname">filtered_matches</td><td>Output vector with all the feature matches that satisfy the cosine similarity constraint </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="a3e61edddcf515dc2ae467134521a6560" name="a3e61edddcf515dc2ae467134521a6560"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a3e61edddcf515dc2ae467134521a6560">&#9670;&#160;</a></span>FilterMatchesByEpipolarConstrain()</h2>
 
@@ -624,6 +695,36 @@ std::mutex&#160;</td><td class="memItemRight" valign="bottom"><b>mMutexStop</b><
 
 </div>
 </div>
+<a id="aa8435c9a6f61369e3dcfe92e9dc1945a" name="aa8435c9a6f61369e3dcfe92e9dc1945a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa8435c9a6f61369e3dcfe92e9dc1945a">&#9670;&#160;</a></span>homogeneousToEuclidean()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void coldetector::CollisionDetector::homogeneousToEuclidean </td>
+          <td>(</td>
+          <td class="paramtype">cv::InputArray</td>          <td class="paramname"><span class="paramname"><em>src</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">cv::OutputArray</td>          <td class="paramname"><span class="paramname"><em>dst</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Converts point coordinates from homogeneours to euclidean coordinates. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">src</td><td>Input vector of N-dimensional points. </td></tr>
+    <tr><td class="paramname">dst</td><td>Output vector of N-1-dimensional points. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="aa09c4115cdb0c5e3c0ecb3a29d3aac96" name="aa09c4115cdb0c5e3c0ecb3a29d3aac96"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#aa09c4115cdb0c5e3c0ecb3a29d3aac96">&#9670;&#160;</a></span>Run()</h2>
 
@@ -669,6 +770,54 @@ std::mutex&#160;</td><td class="memItemRight" valign="bottom"><b>mMutexStop</b><
   <table class="params">
     <tr><td class="paramname">F</td><td><a class="el" href="classcoldetector_1_1MultiFrame.html">MultiFrame</a> object that contains an array of N images, corresponding to each camera. </td></tr>
     <tr><td class="paramname">new_data</td><td>Flag that indicates that new data has been received. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="aa51d36164e89c28c0506dadbc175ea2a" name="aa51d36164e89c28c0506dadbc175ea2a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa51d36164e89c28c0506dadbc175ea2a">&#9670;&#160;</a></span>triangulateDLT()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void coldetector::CollisionDetector::triangulateDLT </td>
+          <td>(</td>
+          <td class="paramtype">const cv::Vec2d &amp;</td>          <td class="paramname"><span class="paramname"><em>xl</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const cv::Vec2d &amp;</td>          <td class="paramname"><span class="paramname"><em>xr</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const cv::Matx34d &amp;</td>          <td class="paramname"><span class="paramname"><em>Pl</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const cv::Matx34d &amp;</td>          <td class="paramname"><span class="paramname"><em>Pr</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">cv::Vec3d &amp;</td>          <td class="paramname"><span class="paramname"><em>point3d</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Triangulate points using DLT algorihtm. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">xl</td><td>Input vector with first 2d point. </td></tr>
+    <tr><td class="paramname">xr</td><td>Input vector with second 2d point. </td></tr>
+    <tr><td class="paramname">Pl</td><td>Input 3x4 first projection matrix. </td></tr>
+    <tr><td class="paramname">Pr</td><td>Input 3x4 second projection matrix. </td></tr>
+    <tr><td class="paramname">point3d</td><td>Output vector with computed 3d point. </td></tr>
   </table>
   </dd>
 </dl>
@@ -768,6 +917,48 @@ std::mutex&#160;</td><td class="memItemRight" valign="bottom"><b>mMutexStop</b><
   </dd>
 </dl>
 <p>Check 3D points</p>
+
+</div>
+</div>
+<a id="a7dff57ae8e27d536b5b5452bebf8190f" name="a7dff57ae8e27d536b5b5452bebf8190f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7dff57ae8e27d536b5b5452bebf8190f">&#9670;&#160;</a></span>triangulatePoints2Views()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void coldetector::CollisionDetector::triangulatePoints2Views </td>
+          <td>(</td>
+          <td class="paramtype">cv::InputArrayOfArrays</td>          <td class="paramname"><span class="paramname"><em>_points2d</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">cv::InputArrayOfArrays</td>          <td class="paramname"><span class="paramname"><em>_projection_matrices</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int &amp;</td>          <td class="paramname"><span class="paramname"><em>pixel_range</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">cv::OutputArray</td>          <td class="paramname"><span class="paramname"><em>_points3d</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Performs the triangulation of 3D points given a set of 2D correspondences between two images and their respective Projection matrices. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">_points2d</td><td>2D point correspondences from image left and right </td></tr>
+    <tr><td class="paramname">_projection_matrices</td><td>Projection matrices of the two views </td></tr>
+    <tr><td class="paramname">pixel_range</td><td>How many pixels are considered from the original 2d point to extract the uncertainty. </td></tr>
+    <tr><td class="paramname">_points3d</td><td>Output matrix with the corresponding triangulated 3D points </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
